@@ -1,5 +1,4 @@
 #include "BusSystemIndexer.h"
-#include "CSVBusSystem.h"
 #include <memory>
 #include <unordered_set>
 #include <algorithm>
@@ -39,7 +38,7 @@ std::shared_ptr<CBusSystem::SRoute> CBusSystemIndexer::SortedRouteByIndex(std::s
 }
 
 std::shared_ptr<CBusSystem::SStop> CBusSystemIndexer::StopByNodeID(CStreetMap::TNodeID id) const noexcept {
-    return DImplementation->BusSystem->StopByNodeID(id);
+    return DImplementation->BusSystem->StopByNodeID( id);
 }
 
 bool CBusSystemIndexer::RoutesByNodeIDs(CStreetMap::TNodeID src, CStreetMap::TNodeID dest,
