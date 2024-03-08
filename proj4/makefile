@@ -111,13 +111,18 @@ $(OBJ_DIR)/OpenStreetMapTest.o: $(TEST_SRC_DIR)/OSMTest.cpp $(INC_DIR)/OpenStree
 	@mkdir -p $(OBJ_DIR)/tests
 	$(CXX) -o $@ -c $(CXXFLAGS) $<
 
-# speedtest
-# speedtest: $(OBJ_DIR)/SpeedTest.o $(OBJ_DIR)/StringUtils.o  $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/OpenStreetMap.o $(OBJ_DIR)/OpenStreetMap.o
-# 	$(CXX) -o $(BIN_DIR)/speedtest $(CXXFLAGS) $^ $(LDFLAGS)
-# 	@echo "speedtest compiled successfully"
-# 	@echo ""
 
-# transplanner
+transplanner: $(OBJ_DIR)/transplanner.o $(OBJ_DIR)/StringUtils.o  $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/OpenStreetMap.o
+	$(CXX) -o $(BIN_DIR)/transplanner $(CXXFLAGS) $^ $(LDFLAGS)
+	@echo "transplanner compiled successfully"
+	@echo ""
+
+# speedtest
+speedtest: $(OBJ_DIR)/SpeedTest.o $(OBJ_DIR)/StringUtils.o  $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/OpenStreetMap.o
+	$(CXX) -o $(BIN_DIR)/speedtest $(CXXFLAGS) $^ $(LDFLAGS)
+	@echo "speedtest compiled successfully"
+	@echo ""
+
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(OBJ_DIR)

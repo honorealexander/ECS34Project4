@@ -16,13 +16,13 @@ namespace StringUtils{
         }
 
         if (start < length) {
-            // Adjust the condition to handle the case when only the start index is provided
+            // adjust the condition to handle the case when only the start index is provided
             if (end == -1 || (end <= length && start <= end)) {
                 return str.substr(start, (end == -1) ? std::string::npos : end - start);
             }
         }
 
-        return "";  // Return an empty string for invalid input
+        return "";  //return an empty string for invalid input
     }
 
     std::string Capitalize(const std::string &str) noexcept{
