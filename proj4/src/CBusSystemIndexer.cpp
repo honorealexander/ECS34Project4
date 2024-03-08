@@ -8,7 +8,7 @@ struct CBusSystemIndexer::SImplementation {
     // aditional private members as needed for implementation
 
     SImplementation(std::shared_ptr<CBusSystem> bussystem) : BusSystem(bussystem) {
-        //Initialize additional members if needed
+        //initialize additional members if needed
     }
 };
 
@@ -61,13 +61,57 @@ std::shared_ptr<CBusSystem::SStop> CBusSystemIndexer::StopByNodeID(TNodeID id) c
 }
 
 bool CBusSystemIndexer::RoutesByNodeIDs(TNodeID src, TNodeID dest, std::unordered_set<std::shared_ptr<CBusSystem::SRoute>> &routes) const noexcept {
-    // Implement logic to find routes between NodeIDs
-    // For now, returning false (no routes found)
-    return false;
+    for (std::size_t i = 0; i < RouteCount(); ++i) {
+        auto route = DImplementation->BusSystem->RouteByIndex(i);
+        if (route) {
+            const auto stopCount = route->StopCount();
+            for (std::size_t j = 0; j < stopCount; ++j) {
+                auto stopID = route->GetStopID(j);
+                auto stop = DImplementation->BusSystem->StopByID(stopID);
+                if (stop && stop->NodeID() == src) {
+                    for (std::size_t k = j + 1; k < stopCount; ++k) {
+                        stopID = route->GetStopID(k);
+                        stop = DImplementation->BusSystem->StopByID(stopID);
+                        if (stop && stop->NodeID() == dest) {
+                            routes.insert(route);
+                            break; //found a route, no need to check further
+                        }
+                    }
+                    break; //stop found, no need to check other stops in the route
+                }
+            }
+        }
+    }
+
+    return !routes.empty();
 }
 
 bool CBusSystemIndexer::RouteBetweenNodeIDs(TNodeID src, TNodeID dest) const noexcept {
-    // Implement logic to check if there is a route between NodeIDs
-    // For now, returning false (no route between NodeIDs)
+    for (std::size_t i = 0; i < RouteCount(); ++i) {
+        auto route = DImplementation->BusSystem->RouteByIndex(i);
+        if (route) {
+            const auto stopCount = route->StopCount();
+            bool srcFound = false;
+            bool destFound = false;
+
+            for (std::size_t j = 0; j < stopCount; ++j) {
+                auto stopID = route->GetStopID(j);
+                auto stop = DImplementation->BusSystem->StopByID(stopID);
+                if (stop) {
+                    if (stop->NodeID() == src) {
+                        srcFound = true;
+                    } else if (stop->NodeID() == dest) {
+                        destFound = true;
+                    }
+
+                    //break early if both source and destination stops are found
+                    if (srcFound && destFound) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
     return false;
 }
