@@ -5,10 +5,10 @@
 
 struct CBusSystemIndexer::SImplementation {
     std::shared_ptr<CBusSystem> BusSystem;
-    // Additional private members as needed for implementation
+    // aditional private members as needed for implementation
 
     SImplementation(std::shared_ptr<CBusSystem> bussystem) : BusSystem(bussystem) {
-        // Initialize additional members if needed
+        //Initialize additional members if needed
     }
 };
 
@@ -51,15 +51,13 @@ std::shared_ptr<CBusSystem::SRoute> CBusSystemIndexer::SortedRouteByIndex(std::s
 }
 
 std::shared_ptr<CBusSystem::SStop> CBusSystemIndexer::StopByNodeID(TNodeID id) const noexcept {
-    // Implement logic to find stop by NodeID
-    // For now, returning the stop with the specified NodeID
-    for (std::size_t i = 0; i < DImplementation->BusSystem->StopCount(); ++i) {
+    for (std::size_t i = 0; i < StopCount(); ++i) {
         auto stop = DImplementation->BusSystem->StopByIndex(i);
         if (stop && stop->NodeID() == id) {
             return stop;
         }
     }
-    return nullptr;
+    return nullptr; //NodeID not found
 }
 
 bool CBusSystemIndexer::RoutesByNodeIDs(TNodeID src, TNodeID dest, std::unordered_set<std::shared_ptr<CBusSystem::SRoute>> &routes) const noexcept {

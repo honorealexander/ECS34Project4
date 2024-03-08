@@ -12,8 +12,17 @@ LDFLAGS = -lgtest -lgtest_main -lpthread -lexpat
 
 all: directories runtests 
 
-runtests: $(BIN_DIR)/teststrutils $(BIN_DIR)/teststrdatasource $(BIN_DIR)/teststrdatasink $(BIN_DIR)/testdsv $(BIN_DIR)/testxml $(BIN_DIR)/testcsvbs $(BIN_DIR)/testosm
+test: runtests
 
+runtests: $(BIN_DIR)/teststrutils $(BIN_DIR)/teststrdatasource $(BIN_DIR)/teststrdatasink $(BIN_DIR)/testdsv $(BIN_DIR)/testxml $(BIN_DIR)/testcsvbs $(BIN_DIR)/testosm
+	@echo "Running all tests..."
+	@./$(BIN_DIR)/teststrutils
+	@./$(BIN_DIR)/teststrdatasource
+	@./$(BIN_DIR)/teststrdatasink
+	@./$(BIN_DIR)/testdsv
+	@./$(BIN_DIR)/testxml
+	@./$(BIN_DIR)/testcsvbs
+	@./$(BIN_DIR)/testosm
 # teststrutils
 $(BIN_DIR)/teststrutils: $(OBJ_DIR)/StringUtils.o $(OBJ_DIR)/StringUtilsTest.o
 	$(CXX) -o $@ $(CXXFLAGS) $(OBJ_DIR)/StringUtils.o $(OBJ_DIR)/StringUtilsTest.o $(LDFLAGS)
