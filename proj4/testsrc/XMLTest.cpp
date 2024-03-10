@@ -1,259 +1,158 @@
 #include <gtest/gtest.h>
 #include "XMLReader.h"
-#include "XMLWriter.h"
-#include "StringUtils.h"
 #include "StringDataSource.h"
 #include "StringDataSink.h"
+#include "XMLEntity.h"
+#include "XMLWriter.h"
 
-TEST(XMLReaderTest, SimpleTest){
-    auto InStream = std::make_shared<CStringDataSource>("<element name=\"val\"></element>");
-    CXMLReader Reader(InStream);
-    SXMLEntity Entity;
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::StartElement);
-    EXPECT_EQ(Entity.DNameData, "element");
-    EXPECT_EQ(Entity.DAttributes.size(), 1);
-    EXPECT_TRUE(Entity.AttributeExists("name"));
-    EXPECT_EQ(Entity.AttributeValue("name"), "val");
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::EndElement);
-    EXPECT_EQ(Entity.DNameData, "element");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
-    
+TEST(XMLReader, ReadEntity) {
+    std::string xmlData = "<root><element1 attribute=\"value\">Hello</element1><element2>World</element2></root>";
+    std::shared_ptr<CStringDataSource> dataSource = std::make_shared<CStringDataSource>(xmlData);
+    CXMLReader xmlReader(dataSource);
+    SXMLEntity entity;
+    bool success = xmlReader.ReadEntity(entity, false);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(entity.DType, SXMLEntity::EType::StartElement);
+    ASSERT_EQ(entity.DNameData, "root");
+}
+TEST(XMLReader, ReadSingleElement) {
+    std::string xmlData = "<book><title>Harry Potter</title></book>";
+    std::shared_ptr<CStringDataSource> source = std::make_shared<CStringDataSource>(xmlData);
+    CXMLReader reader(source);
+
+    SXMLEntity entity;
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::StartElement);
+    EXPECT_EQ(entity.DNameData, "book");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::StartElement);
+    EXPECT_EQ(entity.DNameData, "title");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::CharData);
+    EXPECT_EQ(entity.DNameData, "Harry Potter");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::EndElement);
+    EXPECT_EQ(entity.DNameData, "title");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::EndElement);
+    EXPECT_EQ(entity.DNameData, "book");
 }
 
-TEST(XMLReaderTest, ElementTest){
-    auto InStream = std::make_shared<CStringDataSource>("<?xml version='1.0' encoding='UTF-8'?>\n"
-                                                        "<osm version=\"0.6\" generator=\"osmconvert 0.8.5\">\n"
-                                                        "	<node id=\"62208369\" lat=\"38.5178523\" lon=\"-121.7712408\"/>\n"
-                                                        "	<node id=\"62209104\" lat=\"38.535052\" lon=\"-121.7408606\"/>\n"
-                                                        "</osm>");
-    CXMLReader Reader(InStream);
-    SXMLEntity Entity;
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity, true));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::StartElement);
-    EXPECT_EQ(Entity.DNameData, "osm");
-    EXPECT_EQ(Entity.DAttributes.size(), 2);
-    if(Entity.DAttributes.size() == 2){
-        EXPECT_TRUE(Entity.AttributeExists("version"));
-        EXPECT_EQ(Entity.AttributeValue("version"), "0.6");
-        EXPECT_TRUE(Entity.AttributeExists("generator"));
-        EXPECT_EQ(Entity.AttributeValue("generator"), "osmconvert 0.8.5");
-    }
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity, true));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::StartElement);
-    EXPECT_EQ(Entity.DNameData, "node");
-    EXPECT_EQ(Entity.DAttributes.size(), 3);
-    if(Entity.DAttributes.size() == 3){
-        EXPECT_TRUE(Entity.AttributeExists("id"));
-        EXPECT_EQ(Entity.AttributeValue("id"), "62208369");
-        EXPECT_TRUE(Entity.AttributeExists("lat"));
-        EXPECT_EQ(Entity.AttributeValue("lat"), "38.5178523");
-        EXPECT_TRUE(Entity.AttributeExists("lon"));
-        EXPECT_EQ(Entity.AttributeValue("lon"), "-121.7712408");
-    }
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity, true));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::EndElement);
-    EXPECT_EQ(Entity.DNameData, "node");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
-    
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity, true));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::StartElement);
-    EXPECT_EQ(Entity.DNameData, "node");
-    EXPECT_EQ(Entity.DAttributes.size(), 3);
-    if(Entity.DAttributes.size() == 3){
-        EXPECT_TRUE(Entity.AttributeExists("id"));
-        EXPECT_EQ(Entity.AttributeValue("id"), "62209104");
-        EXPECT_TRUE(Entity.AttributeExists("lat"));
-        EXPECT_EQ(Entity.AttributeValue("lat"), "38.535052");
-        EXPECT_TRUE(Entity.AttributeExists("lon"));
-        EXPECT_EQ(Entity.AttributeValue("lon"), "-121.7408606");
-    }
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity, true));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::EndElement);
-    EXPECT_EQ(Entity.DNameData, "node");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
+TEST(XMLReader, ReadNestedElements) {
+    std::string xmlData = "<book><title>Harry Potter</title><author>J.K. Rowling</author></book>";
+    std::shared_ptr<CStringDataSource> source = std::make_shared<CStringDataSource>(xmlData);
+    CXMLReader reader(source);
 
-    EXPECT_TRUE(Reader.ReadEntity(Entity, true));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::EndElement);
-    EXPECT_EQ(Entity.DNameData, "osm");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
-    
-    EXPECT_TRUE(Reader.End());
+    SXMLEntity entity;
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::StartElement);
+    EXPECT_EQ(entity.DNameData, "book");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::StartElement);
+    EXPECT_EQ(entity.DNameData, "title");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::CharData);
+    EXPECT_EQ(entity.DNameData, "Harry Potter");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::EndElement);
+    EXPECT_EQ(entity.DNameData, "title");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::StartElement);
+    EXPECT_EQ(entity.DNameData, "author");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::CharData);
+    EXPECT_EQ(entity.DNameData, "J.K. Rowling");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::EndElement);
+    EXPECT_EQ(entity.DNameData, "author");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::EndElement);
+    EXPECT_EQ(entity.DNameData, "book");
 }
 
-TEST(XMLReaderTest, CDataTest){
-    auto InStream = std::make_shared<CStringDataSource>( "<bold>Text</bold>");
-    CXMLReader Reader(InStream);
-    SXMLEntity Entity;
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::StartElement);
-    EXPECT_EQ(Entity.DNameData, "bold");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::CharData);
-    EXPECT_EQ(Entity.DNameData, "Text");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::EndElement);
-    EXPECT_EQ(Entity.DNameData, "bold");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
-    
-    EXPECT_TRUE(Reader.End());
+TEST(XMLReader, ReadEmptyElement) {
+    std::string xmlData = "<empty></empty>";
+    std::shared_ptr<CStringDataSource> source = std::make_shared<CStringDataSource>(xmlData);
+    CXMLReader reader(source);
+
+    SXMLEntity entity;
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::StartElement);
+    EXPECT_EQ(entity.DNameData, "empty");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::EndElement);
+    EXPECT_EQ(entity.DNameData, "empty");
 }
 
-TEST(XMLReaderTest, LongCDataTest){
-    auto InStream = std::make_shared<CStringDataSource>( "<elem>"
-                                                        "0                               0"
-                                                        "1                               1"
-                                                        "2                               2"
-                                                        "3                               3"
-                                                        "4                               4"
-                                                        "5                               5"
-                                                        "6                               6"
-                                                        "7                               7"
-                                                        "8                               8"
-                                                        "9                               9"
-                                                        "A                               A"
-                                                        "B                               B"
-                                                        "C                               C"
-                                                        "D                               D"
-                                                        "E                               E"
-                                                        "F                               F"
-                                                        "</elem>");
-    CXMLReader Reader(InStream);
-    SXMLEntity Entity;
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::StartElement);
-    EXPECT_EQ(Entity.DNameData, "elem");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::CharData);
-    EXPECT_EQ(Entity.DNameData, "0                               0"
-                                "1                               1"
-                                "2                               2"
-                                "3                               3"
-                                "4                               4"
-                                "5                               5"
-                                "6                               6"
-                                "7                               7"
-                                "8                               8"
-                                "9                               9"
-                                "A                               A"
-                                "B                               B"
-                                "C                               C"
-                                "D                               D"
-                                "E                               E"
-                                "F                               F");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::EndElement);
-    EXPECT_EQ(Entity.DNameData, "elem");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
-    
-    EXPECT_TRUE(Reader.End());
+TEST(XMLReader, ReadCDATASection) {
+    std::string xmlData = "<description><![CDATA[This is a <b>bold</b> statement]]></description>";
+    std::shared_ptr<CStringDataSource> source = std::make_shared<CStringDataSource>(xmlData);
+    CXMLReader reader(source);
+
+    SXMLEntity entity;
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::StartElement);
+    EXPECT_EQ(entity.DNameData, "description");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::CharData);
+    EXPECT_EQ(entity.DNameData, "This is a <b>bold</b> statement");
+
+    ASSERT_TRUE(reader.ReadEntity(entity, false));
+    EXPECT_EQ(entity.DType, SXMLEntity::EType::EndElement);
+    EXPECT_EQ(entity.DNameData, "description");
 }
 
-TEST(XMLReaderTest, SpecialCharacterTest){
-    auto InStream = std::make_shared<CStringDataSource>( "<elem attr=\"&amp;&quot;&apos;&lt;&gt;\">&amp;&quot;&apos;&lt;&gt;</elem>");
-    CXMLReader Reader(InStream);
-    SXMLEntity Entity;
+TEST(XMLWriter, WriteEntity) {
+    std::shared_ptr<CStringDataSink> sink = std::make_shared<CStringDataSink>();
+    CXMLWriter xmlWriter(sink);
+    SXMLEntity entity;
+    entity.DType = SXMLEntity::EType::StartElement;
+    entity.DNameData = "element";
+    bool success = xmlWriter.WriteEntity(entity);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(sink->String(), "<element>");
+} 
+
+
+TEST(XMLWriter, WriteTwoEntities) {
+    std::shared_ptr<CStringDataSink> sink = std::make_shared<CStringDataSink>();
+    CXMLWriter xmlWriter(sink);
     
-    EXPECT_TRUE(Reader.ReadEntity(Entity));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::StartElement);
-    EXPECT_EQ(Entity.DNameData, "elem");
-    EXPECT_EQ(Entity.DAttributes.size(), 1);
-    EXPECT_TRUE(Entity.AttributeExists("attr"));
-    EXPECT_EQ(Entity.AttributeValue("attr"), "&\"'<>");
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::CharData);
-    EXPECT_EQ(Entity.DNameData, "&\"'<>");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
-    
-    EXPECT_TRUE(Reader.ReadEntity(Entity));
-    EXPECT_EQ(Entity.DType, SXMLEntity::EType::EndElement);
-    EXPECT_EQ(Entity.DNameData, "elem");
-    EXPECT_EQ(Entity.DAttributes.size(), 0);
-    
-    EXPECT_TRUE(Reader.End());
+    SXMLEntity entity1;
+    entity1.DType = SXMLEntity::EType::StartElement;
+    entity1.DNameData = "element1";
+    ASSERT_TRUE(xmlWriter.WriteEntity(entity1));
+
+    SXMLEntity entity2;
+    entity2.DType = SXMLEntity::EType::StartElement;
+    entity2.DNameData = "element2";
+    ASSERT_TRUE(xmlWriter.WriteEntity(entity2));
+
+    std::string expectedOutput = "<element1><element2>";
+    ASSERT_EQ(sink->String(), expectedOutput);
 }
 
-TEST(XMLWriterTest, SimpleTest){
-    auto OutStream = std::make_shared<CStringDataSink>();
-    CXMLWriter Writer(OutStream);
-    
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::StartElement, "element", {{"name","val"}}}));
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::EndElement, "element", {}}));
-
-    EXPECT_EQ(OutStream->String(), "<element name=\"val\"></element>");
+TEST(XMLWriter, WriteEmptyEntity) {
+    std::shared_ptr<CStringDataSink> sink = std::make_shared<CStringDataSink>();
+    CXMLWriter xmlWriter(sink);
+    SXMLEntity emptyEntity;
+    emptyEntity.DType = SXMLEntity::EType::StartElement;
+    emptyEntity.DNameData = "";
+    bool success = xmlWriter.WriteEntity(emptyEntity);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(sink->String(), "<>");
 }
 
-TEST(XMLWriterTest, ElementTest){
-    auto OutStream = std::make_shared<CStringDataSink>();
-    CXMLWriter Writer(OutStream);
-    
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::StartElement, "osm", {{"version","0.6"},{"generator","osmconvert 0.8.5"}}}));
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::CharData, "\n\t", {}}));
-    
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::CompleteElement, "node", {{"id","62208369"},{"lat","38.5178523"},{"lon","-121.7712408"}}}));
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::CharData, "\n\t", {}}));
-    
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::CompleteElement, "node", {{"id","62209104"},{"lat","38.535052"},{"lon","-121.7408606"}}}));
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::CharData, "\n", {}}));
-    
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::EndElement, "osm", {}}));
-
-    EXPECT_EQ(OutStream->String(),  "<osm version=\"0.6\" generator=\"osmconvert 0.8.5\">\n"
-                                    "	<node id=\"62208369\" lat=\"38.5178523\" lon=\"-121.7712408\"/>\n"
-                                    "	<node id=\"62209104\" lat=\"38.535052\" lon=\"-121.7408606\"/>\n"
-                                    "</osm>");
-}
-
-TEST(XMLWriterTest, FlushTest){
-    auto OutStream = std::make_shared<CStringDataSink>();
-    CXMLWriter Writer(OutStream);
-    
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::StartElement, "osm", {{"version","0.6"},{"generator","osmconvert 0.8.5"}}}));
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::CharData, "\n\t", {}}));
-    
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::CompleteElement, "node", {{"id","62208369"},{"lat","38.5178523"},{"lon","-121.7712408"}}}));
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::CharData, "\n\t", {}}));
-    
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::CompleteElement, "node", {{"id","62209104"},{"lat","38.535052"},{"lon","-121.7408606"}}}));
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::CharData, "\n", {}}));
-    
-    EXPECT_TRUE(Writer.Flush());
-
-    EXPECT_EQ(OutStream->String(),  "<osm version=\"0.6\" generator=\"osmconvert 0.8.5\">\n"
-                                    "	<node id=\"62208369\" lat=\"38.5178523\" lon=\"-121.7712408\"/>\n"
-                                    "	<node id=\"62209104\" lat=\"38.535052\" lon=\"-121.7408606\"/>\n"
-                                    "</osm>");
-}
-
-
-TEST(XMLWriterTest, SpecialCharacterTest){
-    auto OutStream = std::make_shared<CStringDataSink>();
-    CXMLWriter Writer(OutStream);
-    
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::StartElement, "elem", {{"attr","&\"'<>"}}}));
-    
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::CharData, "&\"'<>", {}}));
-    
-    EXPECT_TRUE(Writer.WriteEntity({SXMLEntity::EType::EndElement, "elem", {}}));
-
-    EXPECT_EQ(OutStream->String(), "<elem attr=\"&amp;&quot;&apos;&lt;&gt;\">&amp;&quot;&apos;&lt;&gt;</elem>");
-}

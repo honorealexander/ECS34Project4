@@ -104,7 +104,6 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
     std::unordered_map<CBusSystem::TStopID, std::shared_ptr<SImplementation::SStop>> tempStopsByID;  // Separate map
     std::unordered_map<std::string, std::shared_ptr<SImplementation::SRoute>> tempRoutes;
 
-
     while (stopsrc->ReadRow(row)) {
         if (row.size() < 2 || (row[0] == "stop_id" && row[1] == "node_id")) {
             continue;  //skip empty rows and also the title row
@@ -123,11 +122,10 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
         std::cout << "Added stop: ID=" << stop->ID() << ", NodeID=" << stop->NodeID() << std::endl;
     }
 
-    //merge stops from tempStops to Stops and from tempStopsByID to StopsByID
+    //merge stops from tempStops to Stops
     for (const auto& entry : tempStops) {
         DImplementation->Stops.push_back(entry.second);
     }
-    DImplementation->StopsByID.insert(tempStopsByID.begin(), tempStopsByID.end());
 
     //print information about stops in StopsByID map
     for (const auto& entry : DImplementation->StopsByID) {
@@ -155,26 +153,23 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
         }
     }
 
-    //transfer stops from tempStops to main Stops vector
-    for (const auto& entry : tempStops) {
-        DImplementation->Stops.push_back(entry.second);
-        DImplementation->StopsByID[entry.first] = entry.second;
-    }
-
     //transfer routes from tempRoutes to main Routes vector
     for (const auto& entry : tempRoutes) {
         DImplementation->Routes.push_back(entry.second);
         DImplementation->RoutesByName[entry.first] = entry.second;
     }
-}
-
-
-
-CCSVBusSystem::~CCSVBusSystem() {
 
 }
+
+
+
+CCSVBusSystem::~CCSVBusSystem() = default;
 
 std::size_t CCSVBusSystem::StopCount() const noexcept  {
+    std::cout << "Number of Stops: " << DImplementation->Stops.size() << std::endl;
+    for (const auto& stop : DImplementation->Stops) {
+        std::cout << "Stop ID: " << stop->ID() << ", NodeID: " << stop->NodeID() << std::endl;
+    }
     return DImplementation->Stops.size();
 }
 
