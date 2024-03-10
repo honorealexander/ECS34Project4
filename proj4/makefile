@@ -14,7 +14,7 @@ all: directories runtests
 
 test: runtests
 
-runtests: $(BIN_DIR)/teststrutils $(BIN_DIR)/teststrdatasource $(BIN_DIR)/teststrdatasink $(BIN_DIR)/testdsv $(BIN_DIR)/testxml $(BIN_DIR)/testcsvbs $(BIN_DIR)/testosm
+runtests: $(BIN_DIR)/teststrutils $(BIN_DIR)/teststrdatasource $(BIN_DIR)/teststrdatasink $(BIN_DIR)/testdsv $(BIN_DIR)/testxml $(BIN_DIR)/testcsvbs $(BIN_DIR)/testosm $(BIN_DIR)/testdpr $(BIN_DIR)/testcsvbsi $(BIN_DIR)/testtp $(BIN_DIR)/testtpcl $(BIN_DIR)/testkml
 	@echo "Running all tests..."
 	@./$(BIN_DIR)/teststrutils
 	@./$(BIN_DIR)/teststrdatasource
@@ -23,6 +23,12 @@ runtests: $(BIN_DIR)/teststrutils $(BIN_DIR)/teststrdatasource $(BIN_DIR)/testst
 	@./$(BIN_DIR)/testxml
 	@./$(BIN_DIR)/testcsvbs
 	@./$(BIN_DIR)/testosm
+	@./$(BIN_DIR)/testdpr
+	@./$(BIN_DIR)/testcsvbsi
+	@./$(BIN_DIR)/testtp
+	@./$(BIN_DIR)/testtpcl
+	@./$(BIN_DIR)/testkml
+
 # teststrutils
 $(BIN_DIR)/teststrutils: $(OBJ_DIR)/StringUtils.o $(OBJ_DIR)/StringUtilsTest.o
 	$(CXX) -o $@ $(CXXFLAGS) $(OBJ_DIR)/StringUtils.o $(OBJ_DIR)/StringUtilsTest.o $(LDFLAGS)
@@ -110,6 +116,69 @@ $(BIN_DIR)/testosm: $(OBJ_DIR)/OpenStreetMap.o $(OBJ_DIR)/OpenStreetMapTest.o $(
 $(OBJ_DIR)/OpenStreetMapTest.o: $(TEST_SRC_DIR)/OSMTest.cpp $(INC_DIR)/OpenStreetMap.h $(INC_DIR)/StringUtils.h $(INC_DIR)/DSVReader.h $(INC_DIR)/StringDataSource.h $(INC_DIR)/XMLReader.h
 	@mkdir -p $(OBJ_DIR)/tests
 	$(CXX) -o $@ -c $(CXXFLAGS) $<
+
+
+# Additional tests:
+
+# testdpr
+$(BIN_DIR)/testdpr: $(OBJ_DIR)/CDijkstraPathRouter.o $(OBJ_DIR)/CDijkstraPathRouterTest.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
+	@echo "success 8..."
+	@echo ""
+
+$(OBJ_DIR)/CDijkstraPathRouter.o: $(SRC_DIR)/CDijkstraPathRouter.cpp $(INC_DIR)/DijkstraPathRouter.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/CDijkstraPathRouter.cpp
+
+$(OBJ_DIR)/CDijkstraPathRouterTest.o: $(TEST_SRC_DIR)/CDijkstraPathRouterTest.cpp $(INC_DIR)/DijkstraPathRouter.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/CDijkstraPathRouterTest.cpp
+
+# testcsvbsi
+$(BIN_DIR)/testcsvbsi: $(OBJ_DIR)/BusSystemIndexer.o $(OBJ_DIR)/CSVBusSystemIndexerTest.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
+	@echo "success 9..."
+	@echo ""
+
+$(OBJ_DIR)/BusSystemIndexer.o: $(SRC_DIR)/BusSystemIndexer.cpp $(INC_DIR)/BusSystemIndexer.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/BusSystemIndexer.cpp
+
+$(OBJ_DIR)/CSVBusSystemIndexerTest.o: $(TEST_SRC_DIR)/CSVBusSystemIndexerTest.cpp $(INC_DIR)/BusSystemIndexer.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/CSVBusSystemIndexerTest.cpp
+
+# testtpcl
+$(BIN_DIR)/testtpcl: $(OBJ_DIR)/TransportationPlannerCommandLine.o $(OBJ_DIR)/TPCommandLineTest.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
+	@echo "success 10..."
+	@echo ""
+
+$(OBJ_DIR)/TransportationPlannerCommandLine.o: $(SRC_DIR)/TransportationPlannerCommandLine.cpp $(INC_DIR)/TransportationPlannerCommandLine.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/TransportationPlannerCommandLine.cpp
+
+$(OBJ_DIR)/TPCommandLineTest.o: $(TEST_SRC_DIR)/TPCommandLineTest.cpp $(INC_DIR)/TransportationPlannerCommandLine.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/TPCommandLineTest.cpp
+
+# testtp
+$(BIN_DIR)/testtp: $(OBJ_DIR)/CSVOSMTransportationPlannerTest.o $(OBJ_DIR)/DijkstraTransportationPlanner.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
+	@echo "success 11..."
+	@echo ""
+
+$(OBJ_DIR)/CSVOSMTransportationPlannerTest.o: $(TEST_SRC_DIR)/CSVOSMTransportationPlannerTest.cpp $(INC_DIR)/DijkstraTransportationPlanner.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/CSVOSMTransportationPlannerTest.cpp
+
+$(OBJ_DIR)/DijkstraTransportationPlanner.o: $(SRC_DIR)/DijkstraTransportationPlanner.cpp $(INC_DIR)/DijkstraTransportationPlanner.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/DijkstraTransportationPlanner.cpp
+
+# testkml
+$(BIN_DIR)/testkml: $(OBJ_DIR)/KMLWriter.o $(OBJ_DIR)/KMLTest.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
+	@echo "success 12..."
+	@echo ""
+
+$(OBJ_DIR)/KMLWriter.o: $(SRC_DIR)/KMLWriter.cpp $(INC_DIR)/KMLWriter.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/KMLWriter.cpp
+
+$(OBJ_DIR)/KMLTest.o: $(TEST_SRC_DIR)/KMLTest.cpp $(INC_DIR)/KMLWriter.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/KMLTest.cpp
 
 
 transplanner: $(OBJ_DIR)/transplanner.o $(OBJ_DIR)/StringUtils.o  $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/OpenStreetMap.o

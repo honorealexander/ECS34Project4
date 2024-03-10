@@ -1,4 +1,4 @@
-#include "CDijkstraPathRouter.h"
+#include "DijkstraPathRouter.h"
 #include <queue>
 struct CDijkstraPathRouter::SImplementation {
     //add private implementation details as needed
