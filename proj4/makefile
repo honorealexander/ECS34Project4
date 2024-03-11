@@ -119,9 +119,9 @@ $(OBJ_DIR)/OpenStreetMapTest.o: $(TEST_SRC_DIR)/OSMTest.cpp $(INC_DIR)/OpenStree
 
 #PROJECT4
 # testcsvbsi
-$(BIN_DIR)/testcsvbsi: $(OBJ_DIR)/CBusSystemIndexer.o $(OBJ_DIR)/CSVBusSystemIndexerTest.o
+$(BIN_DIR)/testcsvbsi: $(OBJ_DIR)/CBusSystemIndexer.o $(OBJ_DIR)/CSVBusSystemIndexerTest.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringUtils.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
-	@echo "success 9..."
+	@echo "success 8..."
 	@echo ""
 
 $(OBJ_DIR)/CBusSystemIndexer.o: $(SRC_DIR)/CBusSystemIndexer.cpp $(INC_DIR)/BusSystemIndexer.h
@@ -133,7 +133,7 @@ $(OBJ_DIR)/CSVBusSystemIndexerTest.o: $(TEST_SRC_DIR)/CSVBusSystemIndexerTest.cp
 # testdpr
 $(BIN_DIR)/testdpr: $(OBJ_DIR)/CDijkstraPathRouter.o $(OBJ_DIR)/CDijkstraPathRouterTest.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
-	@echo "success 8..."
+	@echo "success 9..."
 	@echo ""
 
 $(OBJ_DIR)/CDijkstraPathRouter.o: $(SRC_DIR)/CDijkstraPathRouter.cpp $(INC_DIR)/PathRouter.h $(INC_DIR)/DijkstraPathRouter.h 
@@ -144,15 +144,15 @@ $(OBJ_DIR)/CDijkstraPathRouterTest.o: $(TEST_SRC_DIR)/CDijkstraPathRouterTest.cp
 
 
 # testtpcl
-$(BIN_DIR)/testtpcl: $(OBJ_DIR)/TransportationPlannerCommandLine.o $(OBJ_DIR)/TPCommandLineTest.o
+$(BIN_DIR)/testtpcl: $(OBJ_DIR)/TransportationPlannerCommandLine.o $(OBJ_DIR)/TPCommandLineTest.o $(SRC_DIR)/CDijkstraTransportationPlanner.o $(SRC_DIR)/CStringDataSource.o $(SRC_DIR)/XMLReader.o $(SRC_DIR)/DSVReader.o $(SRC_DIR)/OpenStreetMap.o $(SRC_DIR)/CSVBusSystem.o $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h 
 	$(CXX) -o $@ $^ $(LDFLAGS)
 	@echo "success 10..."
 	@echo ""
 
-$(OBJ_DIR)/TransportationPlannerCommandLine.o: $(SRC_DIR)/TransportationPlannerCommandLine.cpp $(INC_DIR)/TransportationPlannerCommandLine.h
+$(OBJ_DIR)/TransportationPlannerCommandLine.o: $(SRC_DIR)/TransportationPlannerCommandLine.cpp 
 	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/TransportationPlannerCommandLine.cpp
 
-$(OBJ_DIR)/TPCommandLineTest.o: $(TEST_SRC_DIR)/TPCommandLineTest.cpp $(INC_DIR)/TransportationPlannerCommandLine.h
+$(OBJ_DIR)/TPCommandLineTest.o: $(TEST_SRC_DIR)/TPCommandLineTest.cpp $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h
 	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/TPCommandLineTest.cpp
 
 # testtp
