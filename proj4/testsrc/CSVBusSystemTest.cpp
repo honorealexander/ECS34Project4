@@ -45,7 +45,7 @@ TEST(CSVBusSystem, RouteTest){
     auto InStreamRoutes = std::make_shared<CStringDataSource>(  "route,stop_id\n"
                                                                 "A,1\n"
                                                                 "A,2\n"
-                                                                "A,1\n");
+                                                                "A,3\n");
     auto CSVReaderStops = std::make_shared<CDSVReader>(InStreamStops,',');
     auto CSVReaderRoutes = std::make_shared<CDSVReader>(InStreamRoutes,',');
     CCSVBusSystem BusSystem(CSVReaderStops, CSVReaderRoutes);
@@ -56,10 +56,10 @@ TEST(CSVBusSystem, RouteTest){
     EXPECT_EQ(Route1Index,Route1ID);
     ASSERT_TRUE(bool(Route1Index));
     EXPECT_EQ(Route1Index->Name(),"A");
-    // EXPECT_EQ(Route1Index->StopCount(),3);
-    // EXPECT_EQ(Route1Index->GetStopID(0),1);
-    // EXPECT_EQ(Route1Index->GetStopID(1),2);
-    // EXPECT_EQ(Route1Index->GetStopID(2),1);
+    EXPECT_EQ(Route1Index->StopCount(),3);
+    EXPECT_EQ(Route1Index->GetStopID(0),1);
+    EXPECT_EQ(Route1Index->GetStopID(1),2);
+    EXPECT_EQ(Route1Index->GetStopID(2),3);
 }
 
 /*

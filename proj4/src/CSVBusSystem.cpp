@@ -40,6 +40,9 @@ struct CCSVBusSystem::SImplementation : public CBusSystem{
         }
 
         CBusSystem::TStopID GetStopID(std::size_t index) const noexcept override {
+            for (auto id : stopIDs) {
+                std::cout << "ID: " << id << std::endl;
+            }
             if (index < stopIDs.size()) {
                 return stopIDs[index];
             } else {
@@ -125,7 +128,7 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
         //print stop info for debugging
         std::cout << "Added stop: ID=" << stop->ID() << ", NodeID=" << stop->NodeID() << std::endl;
     }
-    
+
     while (routesrc->ReadRow(row)) {
         if (row.size() < 2 || (row[0] == "route" && row[1] == "stop_id")) {
             continue;  //skip empty rows and title row
@@ -165,7 +168,7 @@ std::size_t CCSVBusSystem::StopCount() const noexcept  {
     for (const auto& stop : DImplementation->Stops) {
         std::cout << "Stop ID: " << stop->ID() << ", NodeID: " << stop->NodeID() << std::endl;
     }
-    return DImplementation->Stops.size();
+    return DImplementation->StopCount();
 }
 
 
