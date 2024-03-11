@@ -2,6 +2,9 @@
 #include "DijkstraPathRouter.h"
 #include "TransportationPlanner.h"
 #include "TransportationPlannerConfig.h"
+#include "StandardDataSource.h"
+#include "StandardDataSink.h"
+#include "StandardErrorDataSink.h"
 // "GeographicUtils.h"
 #include <unordered_map>
 #include <queue>
