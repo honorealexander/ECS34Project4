@@ -1,11 +1,21 @@
 #include "DijkstraPathRouter.h"
+#include "PathRouter.h"
 #include <queue>
+#include <memory>
+#include <any>
+#include <unordered_map>
+#include <unordered_set>
+#include <algorithm>
+
 struct CDijkstraPathRouter::SImplementation {
-    //add private implementation details as needed
+    std::unordered_map<TVertexID, std::unordered_map<TVertexID, double>> DAdjacencyList;
+    std::unordered_map<TVertexID, std::any> DVertexTags;
+    std::size_t VertexCount = 0;
 };
 
 CDijkstraPathRouter::CDijkstraPathRouter() : DImplementation(std::make_unique<SImplementation>()) {
     // Implementation of the constructor
+    
 }
 
 CDijkstraPathRouter::~CDijkstraPathRouter() {
@@ -13,15 +23,15 @@ CDijkstraPathRouter::~CDijkstraPathRouter() {
 }
 
 std::size_t CDijkstraPathRouter::VertexCount() const noexcept {
-    return DImplementation->VertexCount;
+    return DImplementation->VertexCount; //just a skeleton
 }
 
-TVertexID CDijkstraPathRouter::AddVertex(std::any tag) noexcept {
-    //example implementation: Generate a new ID and store the tag
-    TVertexID NewID = DImplementation->VertexTags.size() + 1;
-    DImplementation->VertexTags[NewID] = tag;
+CPathRouter::TVertexID CDijkstraPathRouter::AddVertex(std::any tag) noexcept {
+    //add vertex
+    TVertexID NewID = DImplementation->DVertexTags.size();
+    DImplementation->DVertexTags.emplace(NewID, tag);
     
-    //update the vertex count
+    //update vertex count
     ++DImplementation->VertexCount;
 
     //return the newly created vertex ID
@@ -30,16 +40,20 @@ TVertexID CDijkstraPathRouter::AddVertex(std::any tag) noexcept {
 
 std::any CDijkstraPathRouter::GetVertexTag(TVertexID id) const noexcept {
     //example implementation: Check if the vertex ID exists in the map
-    auto Iter = DImplementation->DVertexTags.find(id);
-    if (Iter != DImplementation->DVertexTags.end()) {
+    auto Iteration = DImplementation->DVertexTags.find(id);
+    if (Iteration != DImplementation->DVertexTags.end()) {
         //return the associated tag if the vertex ID is found
-        return Iter->second;
+        return Iteration->second;
     } else {
         //return a default-constructed std::any if the vertex ID is not found
         return std::any();
     }
 }
 
+/* adds an edge between src and dest vertices with a weight of weight. if
+ bidir is set to true an additional edge between dest and src is added. if
+ src or dest nodes do not exist, or if the weight is negative the AddEdge
+ will return false, otherwise it returns true. */
 bool CDijkstraPathRouter::AddEdge(TVertexID src, TVertexID dest, double weight, bool bidir) noexcept {
     //example implementation: Add the edge from src to dest with the given weight
 
@@ -61,12 +75,14 @@ bool CDijkstraPathRouter::AddEdge(TVertexID src, TVertexID dest, double weight, 
 }
 
 bool CDijkstraPathRouter::Precompute(std::chrono::steady_clock::time_point deadline) noexcept {
-    // Implementation of Precompute
-}
+    // need to do: implementation of Precompute
+    return true;
+};
 
 double CDijkstraPathRouter::FindShortestPath(TVertexID src, TVertexID dest, std::vector<TVertexID>& path) noexcept {
+    
+    
     auto& adjacencyList = DImplementation->DAdjacencyList;
-
     //priority queue to store vertices with their tentative distances
     std::priority_queue<std::pair<double, TVertexID>, std::vector<std::pair<double, TVertexID>>, std::greater<>> priorityQueue;
 

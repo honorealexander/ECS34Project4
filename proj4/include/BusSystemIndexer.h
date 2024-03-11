@@ -21,6 +21,7 @@ class CBusSystemIndexer{
         std::shared_ptr<SStop> StopByNodeID(TNodeID id) const noexcept;
         bool RoutesByNodeIDs(TNodeID src, TNodeID dest, std::unordered_set<std::shared_ptr<SRoute> > &routes) const noexcept;
         bool RouteBetweenNodeIDs(TNodeID src, TNodeID dest) const noexcept;
+        void PrintStopsAndRoutes() const;
 };
 
 #endif
