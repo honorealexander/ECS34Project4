@@ -2,7 +2,7 @@
 #include "DijkstraPathRouter.h"
 #include "TransportationPlanner.h"
 #include "TransportationPlannerConfig.h"
-// #include "GeographicUtils.h"
+// "GeographicUtils.h"
 #include <unordered_map>
 #include <queue>
 #include "kmlout.cpp"
@@ -47,6 +47,7 @@ std::shared_ptr<CStreetMap::SNode> CDijkstraTransportationPlanner::SortedNodeByI
 
         // Return the node at the specified index
         //return sortedNodes[index];
+        return nullptr;
     }
 
     // Index is out of range or equal to NodeCount(), return nullptr
