@@ -200,6 +200,14 @@ $(OBJ_DIR)/tests/%.o: $(SRC_DIR)/tests/%.cpp
 	@mkdir -p $(OBJ_DIR)/tests
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+testdpr: $(BIN_DIR)/testdpr
+	@echo "Running testdpr..."
+	@./$(BIN_DIR)/testdpr
+
+testtp: $(BIN_DIR)/testtp
+	@echo "Running testtp..."
+	@./$(BIN_DIR)/testtp
+
 clean:
 	rm -rf $(OBJ_DIR)
 	rm -rf $(BIN_DIR)

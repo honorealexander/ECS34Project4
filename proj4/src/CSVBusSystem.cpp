@@ -73,7 +73,9 @@ struct CCSVBusSystem::SImplementation : public CBusSystem{
         if (it != StopsByID.end()) {
             return it->second;
         } else {
-            return nullptr;
+        // Print a debug message if the stop is not found
+        std::cerr << "Stop with ID " << id << " not found." << std::endl;
+        return nullptr;
         }
     }
 

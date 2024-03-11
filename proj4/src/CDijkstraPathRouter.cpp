@@ -11,6 +11,11 @@ struct CDijkstraPathRouter::SImplementation {
     std::unordered_map<TVertexID, std::unordered_map<TVertexID, double>> DAdjacencyList;
     std::unordered_map<TVertexID, std::any> DVertexTags;
     std::size_t VertexCount = 0;
+
+    std::vector<std::vector<double>> DistanceMatrix;
+    std::vector<std::vector<TVertexID>> NextVertexMatrix;
+    std::vector<std::vector<TVertexID>> PredecessorMatrix;
+
 };
 
 CDijkstraPathRouter::CDijkstraPathRouter() : DImplementation(std::make_unique<SImplementation>()) {
@@ -55,18 +60,26 @@ std::any CDijkstraPathRouter::GetVertexTag(TVertexID id) const noexcept {
  src or dest nodes do not exist, or if the weight is negative the AddEdge
  will return false, otherwise it returns true. */
 bool CDijkstraPathRouter::AddEdge(TVertexID src, TVertexID dest, double weight, bool bidir) noexcept {
-    //example implementation: Add the edge from src to dest with the given weight
+    // Add the edge from src to dest with the given weight
 
-    //check if src and dest vertices exist
-    if (DImplementation->DAdjacencyList.find(src) == DImplementation->DAdjacencyList.end() ||
-        DImplementation->DAdjacencyList.find(dest) == DImplementation->DAdjacencyList.end()) {
-        return false; //one or both vertices not found
+    // Check if src and dest vertices exist
+    if (DImplementation->DAdjacencyList.find(src) == DImplementation->DAdjacencyList.end()) {
+        AddVertex(std::any());  // Add src if not found
     }
 
-    //add edge from src to dest
+    if (DImplementation->DAdjacencyList.find(dest) == DImplementation->DAdjacencyList.end()) {
+        AddVertex(std::any());  // Add dest if not found
+    }
+
+    // Check if weight is non-negative
+    if (weight < 0.0) {
+        return false;
+    }
+
+    // Add edge from src to dest
     DImplementation->DAdjacencyList[src][dest] = weight;
 
-    //if bidirectional, add edge from dest to src
+    // If bidirectional, add edge from dest to src
     if (bidir) {
         DImplementation->DAdjacencyList[dest][src] = weight;
     }
@@ -74,25 +87,60 @@ bool CDijkstraPathRouter::AddEdge(TVertexID src, TVertexID dest, double weight, 
     return true;
 }
 
+
 bool CDijkstraPathRouter::Precompute(std::chrono::steady_clock::time_point deadline) noexcept {
-    // need to do: implementation of Precompute
+    auto& adjacencyList = DImplementation->DAdjacencyList;
+    auto& vertexCount = DImplementation->VertexCount;
+
+    // Initialize the distance matrix with infinity
+    std::vector<std::vector<double>> distanceMatrix(vertexCount, std::vector<double>(vertexCount, std::numeric_limits<double>::infinity()));
+
+    // Initialize the next vertex matrix with invalid vertices
+std::vector<std::vector<TVertexID>> predecessorMatrix(vertexCount, std::vector<TVertexID>(vertexCount, std::numeric_limits<TVertexID>::max()));
+
+    // Set the initial distances and next vertices based on the adjacency list
+    for (const auto& vertexPair : adjacencyList) {
+        TVertexID srcVertex = vertexPair.first;
+        for (const auto& neighbor : vertexPair.second) {
+            TVertexID destVertex = neighbor.first;
+            double weight = neighbor.second;
+            distanceMatrix[srcVertex][destVertex] = weight;
+            predecessorMatrix[srcVertex][destVertex] = destVertex;
+        }
+    }
+
+    // Apply the Floyd-Warshall algorithm to compute shortest paths
+    for (TVertexID k = 0; k < vertexCount; ++k) {
+        for (TVertexID i = 0; i < vertexCount; ++i) {
+            for (TVertexID j = 0; j < vertexCount; ++j) {
+                if (distanceMatrix[i][k] + distanceMatrix[k][j] < distanceMatrix[i][j]) {
+                    distanceMatrix[i][j] = distanceMatrix[i][k] + distanceMatrix[k][j];
+                    predecessorMatrix[i][j] = k;  // Store the predecessor
+                }
+            }
+        }
+    }
+
+    // Store the precomputed information in the implementation
+    DImplementation->DistanceMatrix = std::move(distanceMatrix);
+    DImplementation->NextVertexMatrix = std::move(predecessorMatrix);
+
     return true;
-};
+}
 
 double CDijkstraPathRouter::FindShortestPath(TVertexID src, TVertexID dest, std::vector<TVertexID>& path) noexcept {
-    
-    
     auto& adjacencyList = DImplementation->DAdjacencyList;
-    //priority queue to store vertices with their tentative distances
+
+    // Priority queue to store vertices with their tentative distances
     std::priority_queue<std::pair<double, TVertexID>, std::vector<std::pair<double, TVertexID>>, std::greater<>> priorityQueue;
 
-    //map to store tentative distances
+    // Map to store tentative distances
     std::unordered_map<TVertexID, double> tentativeDistances;
 
-    //map to store the previous vertex in the shortest path
+    // Map to store the previous vertex in the shortest path
     std::unordered_map<TVertexID, TVertexID> previousVertices;
 
-    //initialize distances and add the source vertex to the priority queue
+    // Initialize distances and add the source vertex to the priority queue
     for (const auto& vertex : adjacencyList) {
         tentativeDistances[vertex.first] = (vertex.first == src) ? 0.0 : std::numeric_limits<double>::infinity();
         priorityQueue.emplace(tentativeDistances[vertex.first], vertex.first);
@@ -103,7 +151,7 @@ double CDijkstraPathRouter::FindShortestPath(TVertexID src, TVertexID dest, std:
         priorityQueue.pop();
 
         if (currentVertex == dest) {
-            //reconstruct the path if the destination is reached
+            // Reconstruct the path if the destination is reached
             while (currentVertex != src) {
                 path.push_back(currentVertex);
                 currentVertex = previousVertices[currentVertex];
@@ -128,4 +176,3 @@ double CDijkstraPathRouter::FindShortestPath(TVertexID src, TVertexID dest, std:
     path.clear();
     return std::numeric_limits<double>::infinity();
 }
-

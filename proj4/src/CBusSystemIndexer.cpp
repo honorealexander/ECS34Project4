@@ -25,10 +25,13 @@ std::size_t CBusSystemIndexer::RouteCount() const noexcept {
     return (DImplementation->BusSystem) ? DImplementation->BusSystem->RouteCount() : 0;
 }
 
+//returns stopp at specific index from a vector of stops
+//retrieves stops and sorts them by id before return
+//retun nullptr if index out of range or vector is empty
 std::shared_ptr<CBusSystem::SStop> CBusSystemIndexer::SortedStopByIndex(std::size_t index) const noexcept {
     auto stops = std::vector<std::shared_ptr<CBusSystem::SStop>>();
-    
-    // Directly query the BusSystem member
+
+    //directly query the BusSystem member
     for (std::size_t i = 0; i < DImplementation->BusSystem->StopCount(); ++i) {
         auto stop = DImplementation->BusSystem->StopByIndex(i);
         if (stop) {
@@ -58,7 +61,10 @@ std::shared_ptr<CBusSystem::SRoute> CBusSystemIndexer::SortedRouteByIndex(std::s
 
     if (!routes.empty() && index < routes.size()) {
         std::sort(routes.begin(), routes.end(), [](const auto &lhs, const auto &rhs) {
-            return lhs->Name() < rhs->Name();
+            if (lhs->Name() != rhs->Name()) {
+                return lhs->Name() < rhs->Name();
+            }
+            return lhs->StopCount() < rhs->StopCount();
         });
 
         return routes[index];
@@ -84,31 +90,45 @@ bool CBusSystemIndexer::RoutesByNodeIDs(TNodeID src, TNodeID dest, std::unordere
 
     for (std::size_t i = 0; i < RouteCount(); ++i) {
         auto route = DImplementation->BusSystem->RouteByIndex(i);
-        if (route) {
-            const auto stopCount = route->StopCount();
-            bool srcFound = false;
-            bool destFound = false;
+        if (!route) {
+            std::cerr << "Route with index " << i << " not found." << std::endl;
+            continue;  // Skip to the next iteration if route is not found
+        }
 
-            for (std::size_t j = 0; j < stopCount; ++j) {
-                auto stopID = route->GetStopID(j);
-                auto stop = DImplementation->BusSystem->StopByID(stopID);
-                if (stop) {
-                    if (stop->NodeID() == src) {
-                        srcFound = true;
-                    } else if (stop->NodeID() == dest) {
-                        destFound = true;
-                    }
-                }
+        const auto stopCount = route->StopCount();
+        bool srcFound = false;
+        bool destFound = false;
+
+        // Initialize the set for the stops in the current route
+        std::unordered_set<TNodeID> routeStops;
+
+        for (std::size_t j = 0; j < stopCount; ++j) {
+            auto stopID = route->GetStopID(j);
+            auto stop = DImplementation->BusSystem->StopByID(stopID);
+            if (!stop) {
+                std::cerr << "Stop with ID " << stopID << " not found in route " << route->Name() << "." << std::endl;
+                continue;  // Skip to the next iteration if stop is not found
             }
 
-            // Insert the route if both source and destination stops are found
-            if (srcFound && destFound) {
-                routes.insert(route);
+            routeStops.insert(stop->NodeID());
+
+            if (stop->NodeID() == src) {
+                srcFound = true;
+            } else if (stop->NodeID() == dest) {
+                destFound = true;
             }
+        }
+
+        // Insert the route if both source and destination stops are found
+        if (srcFound && destFound) {
+            routes.insert(route);
         }
     }
 
-    // If valid routes are found, the function should return true
+    // Debugging information
+    std::cout << "Source: " << src << ", Destination: " << dest << ", Routes size: " << routes.size() << std::endl;
+
+    // Return true if at least one valid route is found
     return !routes.empty();
 }
 
@@ -134,7 +154,7 @@ bool CBusSystemIndexer::RouteBetweenNodeIDs(TNodeID src, TNodeID dest) const noe
                         destFound = true;
                     }
 
-                    // Break early if both source and destination stops are found
+                    //break early if both source and destination stops are found
                     if (srcFound && destFound) {
                         return true;
                     }
