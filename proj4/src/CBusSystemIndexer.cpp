@@ -6,10 +6,9 @@
 
 struct CBusSystemIndexer::SImplementation {
     std::shared_ptr<CBusSystem> BusSystem;
-    // additional private members as needed for implementation
 
     SImplementation(std::shared_ptr<CBusSystem> bussystem) : BusSystem(bussystem) {
-        // initialize additional members if needed
+       
     }
 };
 

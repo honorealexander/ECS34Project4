@@ -120,20 +120,12 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
         tempStops[id] = stop;
         tempStopsByID[id] = stop;
 
+        DImplementation->Stops.push_back(stop);
+        DImplementation->StopsByID[id] = stop;
         //print stop info for debugging
         std::cout << "Added stop: ID=" << stop->ID() << ", NodeID=" << stop->NodeID() << std::endl;
     }
-
-    //merge stops from tempStops to Stops
-    for (const auto& entry : tempStops) {
-        DImplementation->Stops.push_back(entry.second);
-    }
-
-    //print information about stops in StopsByID map
-    for (const auto& entry : DImplementation->StopsByID) {
-        std::cout << "StopsByID: ID=" << entry.first << ", NodeID=" << entry.second->NodeID() << std::endl;
-    }
-
+    
     while (routesrc->ReadRow(row)) {
         if (row.size() < 2 || (row[0] == "route" && row[1] == "stop_id")) {
             continue;  //skip empty rows and title row
@@ -154,6 +146,7 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
             }
         }
     }
+
 
     //transfer routes from tempRoutes to main Routes vector
     for (const auto& entry : tempRoutes) {
@@ -187,7 +180,7 @@ std::shared_ptr<CBusSystem::SStop> CCSVBusSystem::StopByIndex(std::size_t index)
 std::shared_ptr<CBusSystem::SStop> CCSVBusSystem::StopByID(TStopID id) const noexcept {
     auto it = DImplementation->StopsByID.find(id);
     if (it != DImplementation->StopsByID.end()) {
-        return it->second;
+        return DImplementation->StopByID(id);
     } else {
         //print a message indicating the stop was not found
         std::cerr << "Stop with ID " << id << " not found." << std::endl;
