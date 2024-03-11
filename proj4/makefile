@@ -7,10 +7,10 @@ OBJ_DIR = ./obj
 BIN_DIR = ./bin
 TEST_SRC_DIR = ./testsrc
 
-CXXFLAGS = -std=c++17 -I $(INC_DIR) -Wall
+CXXFLAGS = -std=c++17 -I$(INC_DIR) -Wall
 LDFLAGS = -lgtest -lgtest_main -lpthread -lexpat
 
-all: directories runtests 
+all: directories runtests transplanner speedtest
 
 test: runtests
 
@@ -117,7 +117,7 @@ $(OBJ_DIR)/OpenStreetMapTest.o: $(TEST_SRC_DIR)/OSMTest.cpp $(INC_DIR)/OpenStree
 	@mkdir -p $(OBJ_DIR)/tests
 	$(CXX) -o $@ -c $(CXXFLAGS) $<
 
-#PROJECT4
+
 # testcsvbsi
 $(BIN_DIR)/testcsvbsi: $(OBJ_DIR)/CBusSystemIndexer.o $(OBJ_DIR)/CSVBusSystemIndexerTest.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringUtils.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
@@ -132,30 +132,35 @@ $(OBJ_DIR)/CSVBusSystemIndexerTest.o: $(TEST_SRC_DIR)/CSVBusSystemIndexerTest.cp
 
 # testdpr
 $(BIN_DIR)/testdpr: $(OBJ_DIR)/CDijkstraPathRouter.o $(OBJ_DIR)/CDijkstraPathRouterTest.o
+	@mkdir -p $(BIN_DIR)  #create bin directory
 	$(CXX) -o $@ $^ $(LDFLAGS)
 	@echo "success 9..."
 	@echo ""
 
 $(OBJ_DIR)/CDijkstraPathRouter.o: $(SRC_DIR)/CDijkstraPathRouter.cpp $(INC_DIR)/PathRouter.h $(INC_DIR)/DijkstraPathRouter.h 
+	@mkdir -p $(OBJ_DIR)  # Add this line to create the obj directory
 	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/CDijkstraPathRouter.cpp
 
 $(OBJ_DIR)/CDijkstraPathRouterTest.o: $(TEST_SRC_DIR)/CDijkstraPathRouterTest.cpp $(INC_DIR)/PathRouter.h $(INC_DIR)/DijkstraPathRouter.h 
 	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/CDijkstraPathRouterTest.cpp
 
-
 # testtpcl
-$(BIN_DIR)/testtpcl: $(OBJ_DIR)/TransportationPlannerCommandLine.o $(OBJ_DIR)/TPCommandLineTest.o $(OBJ_DIR)/DijkstraTransportationPlanner.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/OpenStreetMap.o $(OBJ_DIR)/CSVBusSystem.o $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h 
+$(BIN_DIR)/testtpcl: $(OBJ_DIR)/TransportationPlannerCommandLine.o $(OBJ_DIR)/TPCommandLineTest.o $(OBJ_DIR)/DijkstraTransportationPlanner.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/OpenStreetMap.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/FileDataSink.o $(OBJ_DIR)/StringUtils.o $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h 
+	@mkdir -p $(BIN_DIR)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 	@echo "success 10..."
 	@echo ""
 
-$(OBJ_DIR)/TransportationPlannerCommandLine.o: $(SRC_DIR)/CTransportationPlannerCommandL.cpp 
+$(OBJ_DIR)/TransportationPlannerCommandLine.o: $(SRC_DIR)/CTransportationPlannerCommandL.cpp
+	@mkdir -p $(OBJ_DIR)
 	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/CTransportationPlannerCommandL.cpp
 
 $(OBJ_DIR)/TPCommandLineTest.o: $(TEST_SRC_DIR)/TPCommandLineTest.cpp $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h
-	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/TPCommandLineTest.cpp
+	@mkdir -p $(OBJ_DIR)/tests
+	$(CXX) -o $@ -c $(CXXFLAGS) $<
 
 # testtp
+
 $(BIN_DIR)/testtp: $(OBJ_DIR)/CSVOSMTransportationPlannerTest.o $(OBJ_DIR)/DijkstraTransportationPlanner.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 	@echo "success 11..."
@@ -207,6 +212,10 @@ testdpr: $(BIN_DIR)/testdpr
 testtp: $(BIN_DIR)/testtp
 	@echo "Running testtp..."
 	@./$(BIN_DIR)/testtp
+
+testtpcl: $(BIN_DIR)/testtpcl
+	@echo "Running testtpcl..."
+	@./$(BIN_DIR)/testtpcl
 
 clean:
 	rm -rf $(OBJ_DIR)
