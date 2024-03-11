@@ -5,6 +5,7 @@
 #include "XMLEntity.h"
 #include "XMLWriter.h"
 
+
 TEST(XMLReader, ReadEntity) {
     std::string xmlData = "<root><element1 attribute=\"value\">Hello</element1><element2>World</element2></root>";
     std::shared_ptr<CStringDataSource> dataSource = std::make_shared<CStringDataSource>(xmlData);

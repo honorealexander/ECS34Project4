@@ -4,6 +4,11 @@
 #include "StringDataSink.h"
 #include "StringDataSource.h"
 
+
+TEST(OSMTest, True){
+    EXPECT_TRUE(true);
+}
+
 class CMockTransportationPlanner : public CTransportationPlanner{
     public:
         MOCK_METHOD(std::size_t, NodeCount, (), (const, noexcept, override));
