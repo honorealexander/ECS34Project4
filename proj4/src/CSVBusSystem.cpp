@@ -131,25 +131,24 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
 
     while (routesrc->ReadRow(row)) {
         if (row.size() < 2 || (row[0] == "route" && row[1] == "stop_id")) {
-            continue;  //skip empty rows and title row
+            continue;  // skip empty rows and title row
         }
-        std::string routeName = row[0]; //get route name
+        std::string routeName = row[0]; // get route name
         CBusSystem::TStopID stopID = std::stoull(row[1]);
 
-        //check if the route name already exists in temporary routes
+        // check if the route name already exists in temporary routes
         auto routeIt = tempRoutes.find(routeName);
-        if (routeIt == tempRoutes.end() || routeIt->second->stopIDsSet.find(stopID) == routeIt->second->stopIDsSet.end()) {
-            auto& route = tempRoutes[routeName];
-            if (!route) {
-                route = std::make_shared<SImplementation::SRoute>(routeName, std::vector<CBusSystem::TStopID>{stopID});
-                route->stopIDsSet.insert(stopID);
-            } else {
-                route->stopIDs.push_back(stopID);
-                route->stopIDsSet.insert(stopID);
-            }
+        if (routeIt == tempRoutes.end()) {
+            // If route not found, create a new route and add it to tempRoutes
+            auto route = std::make_shared<SImplementation::SRoute>(routeName, std::vector<CBusSystem::TStopID>{stopID});
+            route->stopIDsSet.insert(stopID);
+            tempRoutes[routeName] = route;
+        } else {
+            // If route found, add the stopID to the existing route
+            routeIt->second->stopIDs.push_back(stopID);
+            routeIt->second->stopIDsSet.insert(stopID);
         }
     }
-
 
     //transfer routes from tempRoutes to main Routes vector
     for (const auto& entry : tempRoutes) {
