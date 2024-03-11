@@ -46,19 +46,18 @@ struct CXMLReader::SImplementation{
         }
 
         ReaderObject->StartElementHandler(name, Attributes);
-    };
+    }
 
     static void EndElementHandlerCallback(void *context, const XML_Char *name){
         SImplementation *ReaderObject = static_cast<SImplementation *>(context);
         ReaderObject->EndElementHandler(name);
     
-    };
-
+    }
     static void CharacterDataHandlerCallback(void *context, const XML_Char *s, int len){
         SImplementation *ReaderObject = static_cast<SImplementation *>(context);
         ReaderObject->CharacterDataHandler(std::string(s, len));
 
-    };
+    }
 
     SImplementation(std::shared_ptr< CDataSource > src){ //code from discussion
         DDataSource = src;
@@ -67,27 +66,33 @@ struct CXMLReader::SImplementation{
         XML_SetEndElementHandler(DXMLParser, EndElementHandlerCallback);
         XML_SetCharacterDataHandler(DXMLParser, CharacterDataHandlerCallback);
         XML_SetUserData(DXMLParser, this);
-    };
+    }
 
     bool End() const{
         return DEntityQueue.empty();
-    };
+    }
 
-    bool ReadEntity(SXMLEntity &entity, bool skipcdata){
-        while(DEntityQueue.empty()){
-            if(DDataSource->Read(DataBuffer, 256)){
-                XML_Parse(DXMLParser, DataBuffer.data(), DataBuffer.size(), DataBuffer.size() < 256);
+    bool ReadEntity(SXMLEntity &entity, bool skipcdata) {
+        while (DEntityQueue.empty()) {
+            if (DDataSource->Read(DataBuffer, 256)) {
+                if (!XML_Parse(DXMLParser, DataBuffer.data(), DataBuffer.size(), false)) {
+                    return false;
+                }
             } else {
-                XML_Parse(DXMLParser, DataBuffer.data(), 0, true);
+                if (!XML_Parse(DXMLParser, DataBuffer.data(), 0, true)) {
+                    return false;
+                }
             }
         }
-        if(DEntityQueue.empty()){
+        
+        if (DEntityQueue.empty()) {
             return false;
         }
+        
         entity = DEntityQueue.front();
         DEntityQueue.pop();
         return true;
-    };
+    }
 };
 
 CXMLReader::CXMLReader(std::shared_ptr<CDataSource> src) {

@@ -107,9 +107,9 @@ COpenStreetMap::COpenStreetMap(std::shared_ptr<CXMLReader> src) {
                                     [](const auto& attribute) {
                                         return attribute.first == "id";
                                     });
-            if (nodeIDAttribute != entity.DAttributes.end()) {
-                newNode->SetAttribute("id", nodeIDAttribute->second);
-            }
+                if (nodeIDAttribute != entity.DAttributes.end()) {
+                    newNode->SetAttribute("id", nodeIDAttribute->second);
+                }
                 // add the new node to the nodes map
                 DImplementation->nodes[newNode->ID()] = newNode;
             } else if (entity.DNameData == "way") {
