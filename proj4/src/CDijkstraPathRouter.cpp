@@ -29,8 +29,6 @@ CDijkstraPathRouter::~CDijkstraPathRouter() {
     // Perform cleanup or deallocate resources here
 }
 
-// Implementing public member functions
-
 std::size_t CDijkstraPathRouter::VertexCount() const noexcept {
     return DImplementation->VertexCount; //just a skeleton
 }
