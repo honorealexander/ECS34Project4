@@ -1,11 +1,24 @@
+#include "PathRouter.h"
 #include "DijkstraPathRouter.h"
 #include <queue>
-struct CDijkstraPathRouter::SImplementation {
-    //add private implementation details as needed
+#include <unordered_map>
+#include <algorithm>
+
+using TVertexID = std::size_t;
+
+struct CDijkstraPathRouter::SImplementation : public CPathRouter {
+    std::size_t VertexCount() const noexcept {
+        
+    }
+    TVertexID AddVertex(std::any tag) noexcept;
+    std::any GetVertexTag(TVertexID id) const noexcept;
+    bool AddEdge(TVertexID src, TVertexID dest, double weight, bool bidir = false) noexcept;
+    bool Precompute(std::chrono::steady_clock::time_point deadline) noexcept;
+    double FindShortestPath(TVertexID src, TVertexID dest, std::vector<TVertexID> &path) noexcept;
 };
 
 CDijkstraPathRouter::CDijkstraPathRouter() : DImplementation(std::make_unique<SImplementation>()) {
-    // Implementation of the constructor
+    
 }
 
 CDijkstraPathRouter::~CDijkstraPathRouter() {
@@ -13,7 +26,7 @@ CDijkstraPathRouter::~CDijkstraPathRouter() {
 }
 
 std::size_t CDijkstraPathRouter::VertexCount() const noexcept {
-    return DImplementation->VertexCount;
+    return DImplementation->VertexCount();
 }
 
 TVertexID CDijkstraPathRouter::AddVertex(std::any tag) noexcept {
@@ -28,7 +41,7 @@ TVertexID CDijkstraPathRouter::AddVertex(std::any tag) noexcept {
     return NewID;
 }
 
-std::any CDijkstraPathRouter::GetVertexTag(TVertexID id) const noexcept {
+std::any CDijkstraPathRouter::SImplementation::GetVertexTag(TVertexID id) const noexcept {
     //example implementation: Check if the vertex ID exists in the map
     auto Iter = DImplementation->DVertexTags.find(id);
     if (Iter != DImplementation->DVertexTags.end()) {
@@ -40,7 +53,7 @@ std::any CDijkstraPathRouter::GetVertexTag(TVertexID id) const noexcept {
     }
 }
 
-bool CDijkstraPathRouter::AddEdge(TVertexID src, TVertexID dest, double weight, bool bidir) noexcept {
+bool CDijkstraPathRouter::SImplementation::AddEdge(TVertexID src, TVertexID dest, double weight, bool bidir) noexcept {
     //example implementation: Add the edge from src to dest with the given weight
 
     //check if src and dest vertices exist
@@ -60,11 +73,11 @@ bool CDijkstraPathRouter::AddEdge(TVertexID src, TVertexID dest, double weight, 
     return true;
 }
 
-bool CDijkstraPathRouter::Precompute(std::chrono::steady_clock::time_point deadline) noexcept {
+bool CDijkstraPathRouter::SImplementation::Precompute(std::chrono::steady_clock::time_point deadline) noexcept {
     // Implementation of Precompute
 }
 
-double CDijkstraPathRouter::FindShortestPath(TVertexID src, TVertexID dest, std::vector<TVertexID>& path) noexcept {
+double CDijkstraPathRouter::SImplementation::FindShortestPath(TVertexID src, TVertexID dest, std::vector<TVertexID>& path) noexcept {
     auto& adjacencyList = DImplementation->DAdjacencyList;
 
     //priority queue to store vertices with their tentative distances
