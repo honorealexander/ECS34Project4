@@ -89,7 +89,7 @@ double CDijkstraTransportationPlanner::FindFastestPath(TNodeID src, TNodeID dest
 
     // Access the configuration parameters
     double walkSpeed = DImplementation->DConfig->WalkSpeed();
-    double bikeSpeed = DImplementation->DConfig->BikeSpeed();
+    //double bikeSpeed = DImplementation->DConfig->BikeSpeed();
 
     // Initialize data structures for Dijkstra's algorithm
     std::priority_queue<std::pair<double, TNodeID>, std::vector<std::pair<double, TNodeID>>, std::greater<>> priorityQueue;
@@ -133,4 +133,8 @@ double CDijkstraTransportationPlanner::FindFastestPath(TNodeID src, TNodeID dest
     // No path found
     path.clear();
     return CPathRouter::NoPathExists;
+}
+
+bool GetPathDescription(const std::vector< TTripStep > &path, std::vector< std::string > &desc) const override{
+    return true;
 }

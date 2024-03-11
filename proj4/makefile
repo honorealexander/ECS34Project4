@@ -186,16 +186,16 @@ $(OBJ_DIR)/StandardErrorDataSink.o: $(SRC_DIR)/StandardErrorDataSink.cpp $(INC_D
 
 
 # testtp
-$(BIN_DIR)/testtp: $(OBJ_DIR)/CSVOSMTransportationPlannerTest.o $(OBJ_DIR)/DijkstraTransportationPlanner.o $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/StandardDataSink.o $(OBJ_DIR)/StandardDataSource.o $(OBJ_DIR)/StandardErrorDataSink.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringDataSink.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/XMLWriter.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/DSVWriter.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/OpenStreetMap.o $(OBJ_DIR)/FileDataSink.o $(OBJ_DIR)/StringUtils.o $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/KMLWriter.o 
+$(BIN_DIR)/testtp: $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/FileDataFactory.o $(OBJ_DIR)/StandardDataSink.o $(OBJ_DIR)/StandardDataSource.o $(OBJ_DIR)/StandardErrorDataSink.o $(OBJ_DIR)/DijkstraTransportationPlanner.o $(OBJ_DIR)/CSVOSMTransportationPlannerTest.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringDataSink.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/XMLWriter.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/DSVWriter.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/FileDataSink.o $(OBJ_DIR)/StringUtils.o $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/KMLWriter.o 
 	$(CXX) -o $@ $^ $(LDFLAGS)
 	@echo "success 11..."
 	@echo ""
 
+$(OBJ_DIR)/DijkstraTransportationPlanner.o: $(SRC_DIR)/CDijkstraTransportationPlanner.cpp $(INC_DIR)/DijkstraTransportationPlanner.h $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/GeographicUtils.h $(INC_DIR)/StandardDataSink.h $(INC_DIR)/StandardDataSource.h $(INC_DIR)/StandardErrorDataSink.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/CDijkstraTransportationPlanner.cpp
+
 $(OBJ_DIR)/CSVOSMTransportationPlannerTest.o: $(TEST_SRC_DIR)/CSVOSMTransportationPlannerTest.cpp $(INC_DIR)/DijkstraTransportationPlanner.h $(INC_DIR)/GeographicUtils.h $(INC_DIR)/StandardDataSink.h $(INC_DIR)/StandardDataSource.h $(INC_DIR)/StandardErrorDataSink.h
 	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/CSVOSMTransportationPlannerTest.cpp
-
-$(OBJ_DIR)/DijkstraTransportationPlanner.o: $(SRC_DIR)/CDijkstraTransportationPlanner.cpp $(INC_DIR)/DijkstraTransportationPlanner.h $(INC_DIR)/GeographicUtils.h $(INC_DIR)/StandardDataSink.h $(INC_DIR)/StandardDataSource.h $(INC_DIR)/StandardErrorDataSink.h
-	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/CDijkstraTransportationPlanner.cpp
 
 
 # testkml
