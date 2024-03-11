@@ -8,25 +8,26 @@ BIN_DIR = ./bin
 TEST_SRC_DIR = ./testsrc
 
 CXXFLAGS = -std=c++17 -I$(INC_DIR) -Wall
-LDFLAGS = -l -lgtest -lgtest_main -lpthread -lexpat
+LDFLAGS = -lgtest -lgtest_main -lpthread -lexpat
 
 all: directories runtests transplanner speedtest
 
 test: runtests
 
-runtests: $(BIN_DIR)/teststrutils $(BIN_DIR)/teststrdatasource $(BIN_DIR)/teststrdatasink $(BIN_DIR)/testdsv $(BIN_DIR)/testxml $(BIN_DIR)/testcsvbs $(BIN_DIR)/testosm $(BIN_DIR)/testcsvbsi $(BIN_DIR)/testdpr $(BIN_DIR)/testtp $(BIN_DIR)/testtpcl $(BIN_DIR)/testkml
+runtests: $(BIN_DIR)/teststrutils $(BIN_DIR)/teststrdatasource $(BIN_DIR)/teststrdatasink $(BIN_DIR)/testfiledatass $(BIN_DIR)/testdsv $(BIN_DIR)/testxml $(BIN_DIR)/testcsvbs $(BIN_DIR)/testosm $(BIN_DIR)/testdpr $(BIN_DIR)/testcsvbsi $(BIN_DIR)/testtpcl $(BIN_DIR)/testtp $(BIN_DIR)/testkml
 	@echo "Running all tests..."
 	@./$(BIN_DIR)/teststrutils
 	@./$(BIN_DIR)/teststrdatasource
 	@./$(BIN_DIR)/teststrdatasink
+	@./$(BIN_DIR)/testfiledatass
 	@./$(BIN_DIR)/testdsv
 	@./$(BIN_DIR)/testxml
 	@./$(BIN_DIR)/testcsvbs
 	@./$(BIN_DIR)/testosm
-	@./$(BIN_DIR)/testcsvbsi
 	@./$(BIN_DIR)/testdpr
-	@./$(BIN_DIR)/testtp
+	@./$(BIN_DIR)/testcsvbsi
 	@./$(BIN_DIR)/testtpcl
+	@./$(BIN_DIR)/testtp
 	@./$(BIN_DIR)/testkml
 
 # teststrutils
@@ -64,6 +65,24 @@ $(OBJ_DIR)/StringDataSink.o: $(SRC_DIR)/StringDataSink.cpp $(INC_DIR)/StringData
 
 $(OBJ_DIR)/StringDataSinkTest.o: $(TEST_SRC_DIR)/StringDataSinkTest.cpp $(INC_DIR)/StringDataSink.h $(INC_DIR)/DataSink.h
 	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/StringDataSinkTest.cpp
+
+#testfiledatass
+$(BIN_DIR)/testfiledatass: $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/FileDataSink.o $(OBJ_DIR)/FileDataFactory.o $(OBJ_DIR)/FileDataSSTest.o
+	$(CXX) -o $@ $(CXXFLAGS) $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/FileDataSink.o $(OBJ_DIR)/FileDataFactory.o $(OBJ_DIR)/FileDataSSTest.o $(LDFLAGS)
+	@echo "SUCCESS"
+	@echo ""
+
+$(OBJ_DIR)/FileDataSource.o: $(SRC_DIR)/FileDataSource.cpp $(INC_DIR)/FileDataSource.h $(INC_DIR)/DataSource.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/FileDataSource.cpp
+
+$(OBJ_DIR)/FileDataSink.o: $(SRC_DIR)/FileDataSink.cpp $(INC_DIR)/FileDataSink.h $(INC_DIR)/DataSink.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/FileDataSink.cpp
+
+$(OBJ_DIR)/FileDataFactory.o: $(SRC_DIR)/FileDataFactory.cpp $(INC_DIR)/FileDataFactory.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/FileDataFactory.cpp
+
+$(OBJ_DIR)/FileDataSSTest.o: $(TEST_SRC_DIR)/FileDataSSTest.cpp $(INC_DIR)/FileDataSource.h $(INC_DIR)/FileDataSink.h $(INC_DIR)/FileDataFactory.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/FileDataSSTest.cpp
 
 # testdsv
 $(BIN_DIR)/testdsv: $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/DSVWriter.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringDataSink.o $(OBJ_DIR)/DSVTest.o $(OBJ_DIR)/StringUtils.o
@@ -117,23 +136,11 @@ $(OBJ_DIR)/OpenStreetMapTest.o: $(TEST_SRC_DIR)/OSMTest.cpp $(INC_DIR)/OpenStree
 	@mkdir -p $(OBJ_DIR)/tests
 	$(CXX) -o $@ -c $(CXXFLAGS) $<
 
-# testcsvbsi
-$(BIN_DIR)/testcsvbsi: $(OBJ_DIR)/CBusSystemIndexer.o $(OBJ_DIR)/CSVBusSystemIndexerTest.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringUtils.o
-	$(CXX) -o $@ $^ $(LDFLAGS)
-	@echo "success 8..."
-	@echo ""
-
-$(OBJ_DIR)/CBusSystemIndexer.o: $(SRC_DIR)/CBusSystemIndexer.cpp $(INC_DIR)/BusSystemIndexer.h
-	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/CBusSystemIndexer.cpp
-
-$(OBJ_DIR)/CSVBusSystemIndexerTest.o: $(TEST_SRC_DIR)/CSVBusSystemIndexerTest.cpp $(INC_DIR)/BusSystemIndexer.h
-	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/CSVBusSystemIndexerTest.cpp
-
 # testdpr
 $(BIN_DIR)/testdpr: $(OBJ_DIR)/CDijkstraPathRouter.o $(OBJ_DIR)/CDijkstraPathRouterTest.o
 	@mkdir -p $(BIN_DIR)  #create bin directory
 	$(CXX) -o $@ $^ $(LDFLAGS)
-	@echo "success 9..."
+	@echo "success 8..."
 	@echo ""
 
 $(OBJ_DIR)/CDijkstraPathRouter.o: $(SRC_DIR)/CDijkstraPathRouter.cpp $(INC_DIR)/PathRouter.h $(INC_DIR)/DijkstraPathRouter.h 
@@ -143,23 +150,33 @@ $(OBJ_DIR)/CDijkstraPathRouter.o: $(SRC_DIR)/CDijkstraPathRouter.cpp $(INC_DIR)/
 $(OBJ_DIR)/CDijkstraPathRouterTest.o: $(TEST_SRC_DIR)/CDijkstraPathRouterTest.cpp $(INC_DIR)/PathRouter.h $(INC_DIR)/DijkstraPathRouter.h 
 	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/CDijkstraPathRouterTest.cpp
 
+# testcsvbsi
+$(BIN_DIR)/testcsvbsi: $(OBJ_DIR)/CBusSystemIndexer.o $(OBJ_DIR)/CSVBusSystemIndexerTest.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringUtils.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
+	@echo "success 9..."
+	@echo ""
+
+$(OBJ_DIR)/CBusSystemIndexer.o: $(SRC_DIR)/CBusSystemIndexer.cpp $(INC_DIR)/BusSystemIndexer.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/CBusSystemIndexer.cpp
+
+$(OBJ_DIR)/CSVBusSystemIndexerTest.o: $(TEST_SRC_DIR)/CSVBusSystemIndexerTest.cpp $(INC_DIR)/BusSystemIndexer.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/CSVBusSystemIndexerTest.cpp
+
 # testtpcl
-$(BIN_DIR)/testtpcl: $(OBJ_DIR)/TransportationPlannerCommandLine.o $(OBJ_DIR)/TPCommandLineTest.o $(OBJ_DIR)/DijkstraTransportationPlanner.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/OpenStreetMap.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/FileDataSink.o $(OBJ_DIR)/StringUtils.o $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h 
-	@mkdir -p $(BIN_DIR)
+$(BIN_DIR)/testtpcl: $(OBJ_DIR)/TransportationPlannerCommandLine.o $(OBJ_DIR)/TPCommandLineTest.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/OpenStreetMap.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/FileDataSink.o $(OBJ_DIR)/StringUtils.o 
 	$(CXX) -o $@ $^ $(LDFLAGS)
 	@echo "success 10..."
 	@echo ""
 
-$(OBJ_DIR)/TransportationPlannerCommandLine.o: $(SRC_DIR)/CTransportationPlannerCommandL.cpp
+$(OBJ_DIR)/TransportationPlannerCommandLine.o: $(SRC_DIR)/TransportationPlannerCommandLine.cpp $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h $(INC_DIR)/TransportationPlannerConfig.h
 	@mkdir -p $(OBJ_DIR)
-	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/CTransportationPlannerCommandL.cpp
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/TransportationPlannerCommandLine.cpp
 
-$(OBJ_DIR)/TPCommandLineTest.o: $(TEST_SRC_DIR)/TPCommandLineTest.cpp $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h
-	@mkdir -p $(OBJ_DIR)/tests
-	$(CXX) -o $@ -c $(CXXFLAGS) $<
+$(OBJ_DIR)/TPCommandLineTest.o: $(TEST_SRC_DIR)/TPCommandLineTest.cpp $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h $(INC_DIR)/TransportationPlannerConfig.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/TPCommandLineTest.cpp
+
 
 # testtp
-
 $(BIN_DIR)/testtp: $(OBJ_DIR)/CSVOSMTransportationPlannerTest.o $(OBJ_DIR)/DijkstraTransportationPlanner.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 	@echo "success 11..."
@@ -170,6 +187,7 @@ $(OBJ_DIR)/CSVOSMTransportationPlannerTest.o: $(TEST_SRC_DIR)/CSVOSMTransportati
 
 $(OBJ_DIR)/DijkstraTransportationPlanner.o: $(SRC_DIR)/CDijkstraTransportationPlanner.cpp $(INC_DIR)/DijkstraTransportationPlanner.h
 	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/CDijkstraTransportationPlanner.cpp
+
 
 # testkml
 $(BIN_DIR)/testkml: $(OBJ_DIR)/KMLWriter.o $(OBJ_DIR)/KMLTest.o $(OBJ_DIR)/XMLWriter.o $(OBJ_DIR)/StringDataSink.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringUtils.o

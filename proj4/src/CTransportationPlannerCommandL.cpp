@@ -1,6 +1,13 @@
 #include "TransportationPlannerCOmmandLine.h"
 #include "TransportationPlannerConfig.h"
 #include "TransportationPlanner.h"
+#include "StringDataSource.h"
+#include "StringDataSink.h"
+#include "DSVReader.h"
+#include "XMLReader.h"
+#include "OpenStreetMap.h"
+#include "CSVBusSysyem.h"
+#include "FileDataSink.h"
 #include <iterator>
 #include <sstream>
 
