@@ -11,6 +11,10 @@
 #include "kmlout.cpp"
 #include "OpenStreetMap.cpp"
 
+using TNodeID = CStreetMap::TNodeID;
+enum class ETransportationMode {Walk, Bike, Bus};
+using TTripStep = std::pair<ETransportationMode, TNodeID>;
+
 extern std::unordered_map<CStreetMap::TNodeID, CStreetMap::TLocation> DNodeIDToLocation;
 
 struct CDijkstraTransportationPlanner::SImplementation {
@@ -18,6 +22,26 @@ struct CDijkstraTransportationPlanner::SImplementation {
     std::vector<std::vector<double>> DDistanceMatrix;
     std::vector<std::vector<TNodeID>> DNextNodeMatrix;
     std::unordered_map<TNodeID, std::vector<TNodeID>> NodeNeighbors;
+
+    std::size_t NodeCount() const noexcept {
+        return 0;
+    }
+    std::shared_ptr<CStreetMap::SNode> SortedNodeByIndex(std::size_t index) const noexcept {
+        return 0;
+    }
+
+
+    double FindShortestPath(TNodeID src, TNodeID dest, std::vector< TNodeID > &path)  {
+        return 0;
+    }
+
+    double FindFastestPath(TNodeID src, TNodeID dest, std::vector< TTripStep > &path)  {
+        return 0;
+    }
+
+    bool GetPathDescription(const std::vector< TTripStep > &path, std::vector< std::string > &desc) const noexcept {
+        return true;
+    }
 };
 
 
@@ -135,6 +159,6 @@ double CDijkstraTransportationPlanner::FindFastestPath(TNodeID src, TNodeID dest
     return CPathRouter::NoPathExists;
 }
 
-bool GetPathDescription(const std::vector< TTripStep > &path, std::vector< std::string > &desc) const override{
+bool CDijkstraTransportationPlanner::GetPathDescription(const std::vector< TTripStep > &path, std::vector< std::string > &desc) const {
     return true;
 }
