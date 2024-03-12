@@ -37,6 +37,5 @@ Our destructor is in charge of cleanup and getting rid of allocated memory that 
 
 ## Member Functions
 std::size_t CDijkstraTransportationPlanner::NodeCount() const noexcept {
-    return COpenStreetMap::nodes.size();  
-}
+
 Node count returns how many nodes
