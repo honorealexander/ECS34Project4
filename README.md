@@ -9,6 +9,12 @@
 We are currently trying to fix our OSM file because we believe it is causing errors in our tranpsortationplannercommandline file
 
 ## Links
+Used this to help understand Djikstra's:
+https://brilliant.org/wiki/dijkstras-short-path-finder/
+
+Used this to implement Floyd-Warshall algorithm to find all of the shortest paths between all nodes rather than the single shortest through Dijkstra:
+https://www.geeksforgeeks.org/comparison-dijkstras-floyd-warshall-algorithms/#:~:text=Dijkstra's%20algorithm%20is%20a%20single%2Dsource%20shortest%20path%20algorithm%20used,vertices%20in%20a%20weighted%20graph
+
 
 ## Generative AI
 
