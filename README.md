@@ -2,7 +2,7 @@
 
 ## Olive Maunupau SSID: 918816205
 
-## Honorè Alexander SSID: 
+## Honorè Alexander SSID: 921129112
 
 ## Current Status
 
