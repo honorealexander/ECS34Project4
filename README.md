@@ -2,13 +2,30 @@
 
 ## Olive Maunupau SSID: 918816205
 
-## Honorè Alexander SSID: 
+## Honorè Alexander SSID: 921129112
 
 ## Current Status
 
 We are currently trying to fix our OSM file because we believe it is causing errors in our tranpsortationplannercommandline file
 
 ## Links
+Used this to help understand Djikstra's:
+https://brilliant.org/wiki/dijkstras-short-path-finder/
+
+Used this to implement Floyd-Warshall algorithm to find all of the shortest paths between all nodes rather than the single shortest through Dijkstra:
+https://www.geeksforgeeks.org/comparison-dijkstras-floyd-warshall-algorithms/#:~:text=Dijkstra's%20algorithm%20is%20a%20single%2Dsource%20shortest%20path%20algorithm%20used,vertices%20in%20a%20weighted%20graph
+
+for help with std:any
+https://en.cppreference.com/w/cpp/utility/any
+
+for help with std::move
+https://en.cppreference.com/w/cpp/utility/move
+
+for help with Dijkstras
+https://en.cppreference.com/w/cpp/types/numeric_limits/infinity
+
+for std::reverse
+https://en.cppreference.com/w/cpp/algorithm/reverse
 
 ## Generative AI
 
@@ -137,3 +154,126 @@ To this line:
                 if (!XML_Parse(DXMLParser, DataBuffer.data(), 0, true)) {
                     return false;
                 }
+
+
+### Prompt 3
+Can you show me how I may implement an adjacency list with an unordered map in c++?
+
+### Response 3
+Certainly! Here's how you can implement an adjacency list using std::unordered_map where each edge has an associated weight:
+
+cpp
+Copy code
+#include <iostream>
+#include <unordered_map>
+
+// Define the vertex ID type
+using TVertexID = int;
+
+// Define the adjacency list type
+using AdjacencyList = std::unordered_map<TVertexID, std::unordered_map<TVertexID, double>>;
+
+// Function to add an edge to the adjacency list
+void addEdge(AdjacencyList& adjacencyList, TVertexID src, TVertexID dest, double weight) {
+    // Add the destination vertex with its weight to the adjacency list of the source vertex
+    adjacencyList[src][dest] = weight;
+    
+    // If it's an undirected graph, add the reverse edge
+    // adjacencyList[dest][src] = weight; // Uncomment this line for undirected graph
+}
+
+int main() {
+    // Create an empty adjacency list
+    AdjacencyList adjacencyList;
+
+    // Add edges to the graph
+    addEdge(adjacencyList, 0, 1, 3.5);  // Edge from vertex 0 to vertex 1 with weight 3.5
+    addEdge(adjacencyList, 0, 2, 2.0);  // Edge from vertex 0 to vertex 2 with weight 2.0
+    addEdge(adjacencyList, 1, 2, 1.5);  // Edge from vertex 1 to vertex 2 with weight 1.5
+
+    // Accessing the adjacency list
+    for (const auto& pair : adjacencyList) {
+        TVertexID vertex = pair.first;
+        const auto& neighbors = pair.second;
+        std::cout << "Vertex " << vertex << " is adjacent to:";
+        for (const auto& neighbor : neighbors) {
+            TVertexID neighborVertex = neighbor.first;
+            double weight = neighbor.second;
+            std::cout << " (vertex " << neighborVertex << ", weight " << weight << ")";
+        }
+        std::cout << std::endl;
+    }
+
+    return 0;
+}
+This example demonstrates how to create an adjacency list for an undirected graph where each edge has an associated weight. Uncommenting the line inside the addEdge function allows you to create a directed graph by adding only the forward edges.
+
+### Changes 3
+Used this info to create my DAdjacencyList in CDjikstraPathRouter
+std::unordered_map<TVertexID, std::unordered_map<TVertexID, double>> DAdjacencyList;
+
+### Prompt 4
+bool CDijkstraPathRouter::Precompute(std::chrono::steady_clock::time_point deadline) noexcept {
+    auto& adjacencyList = DImplementation->DAdjacencyList;
+    auto& vertexCount = DImplementation->VertexCount;
+}
+
+How can i intialize my distance in predecessor matrix here? 
+
+### Response 4
+To initialize the distance and predecessor matrices (distanceMatrix and predecessorMatrix), you can use a similar approach as initializing the adjacency list. You can loop through each vertex and set the initial values accordingly.
+
+Here's how you can initialize both matrices:
+
+cpp
+Copy code
+bool CDijkstraPathRouter::Precompute(std::chrono::steady_clock::time_point deadline) noexcept {
+    auto& adjacencyList = DImplementation->DAdjacencyList;
+    auto& vertexCount = DImplementation->VertexCount;
+
+    // Initialize distance matrix and predecessor matrix
+        std::vector<std::vector<double>> distanceMatrix(vertexCount, std::vector<double>(vertexCount, std::numeric_limits<double>::infinity()));    
+    std::vector<std::vector<TVertexID>> predecessorMatrix(vertexCount, std::vector<TVertexID>(vertexCount, std::numeric_limits<TVertexID>::max()));
+
+    // Now you can use these matrices for further computation
+
+    return true;  // Or return false if an error occurred
+}
+
+### Changes 4
+I initialized my matrices using this way and cited them in the comments.
+
+### Prompt 5
+double CDijkstraPathRouter::FindShortestPath(TVertexID src, TVertexID dest, std::vector<TVertexID>& path) noexcept {
+    auto& adjacencyList = DImplementation->DAdjacencyList;
+    //priority queue used for Dijkstras
+    std::priority_queue<std::pair<double, TVertexID>, std::vector<std::pair<double, TVertexID>>, std::greater<>> priorityQueue;
+
+    std::unordered_map<TVertexID, double> tentativeDistances; //store tentative distances
+
+    std::unordered_map<TVertexID, TVertexID> previousVertices; //store previous vertices
+How can I innitialize the tentative distance of each vertex in the graph?
+
+### Response 5
+To initialize the tentative distance of each vertex in the graph, you can use a map or an array to store these distances. Here's how you can do it:
+
+Using a std::unordered_map:
+
+cpp
+Copy code
+#include <unordered_map>
+#include <limits>
+
+// Assuming TVertexID is the type used to represent vertex IDs
+using TVertexID = /* specify your vertex ID type here */;
+
+// Assuming your graph is represented by an adjacency list stored in DAdjacencyList
+std::unordered_map<TVertexID, double> tentativeDistances;
+
+// Initialize tentative distances for each vertex in the graph
+for (const auto& vertex : DAdjacencyList) {
+    tentativeDistances[vertex.first] = (vertex.first == src) ? 0.0 : std::numeric_limits<double>::infinity();
+}
+
+### Changes 5
+I used this for loop within my adjacency list to initialize my graph, then afterwards I am able to add the vertex and ID pair to my priority queue to use for DJikstra's.

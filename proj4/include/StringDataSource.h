@@ -6,11 +6,11 @@
 
 class CStringDataSource : public CDataSource{
     private:
-        std::string DString;
+        // std::string DString;
         size_t DIndex;
     public:
         CStringDataSource(const std::string &str);
-
+        std::string DString;
         bool End() const noexcept override;
         bool Get(char &ch) noexcept override;
         bool Peek(char &ch) noexcept override;
