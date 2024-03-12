@@ -5,6 +5,7 @@ INC_DIR = ./include
 SRC_DIR = ./src
 OBJ_DIR = ./obj
 BIN_DIR = ./bin
+$(shell mkdir -p $(BIN_DIR))
 TEST_SRC_DIR = ./testsrc
 
 CXXFLAGS = -std=c++17 -I$(INC_DIR) -Wall
@@ -73,6 +74,7 @@ $(BIN_DIR)/testfiledatass: $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/FileDataSink.o
 	@echo ""
 
 $(OBJ_DIR)/FileDataSource.o: $(SRC_DIR)/FileDataSource.cpp $(INC_DIR)/FileDataSource.h $(INC_DIR)/DataSource.h
+	@mkdir -p $(OBJ_DIR)
 	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/FileDataSource.cpp
 
 $(OBJ_DIR)/FileDataSink.o: $(SRC_DIR)/FileDataSink.cpp $(INC_DIR)/FileDataSink.h $(INC_DIR)/DataSink.h
@@ -186,8 +188,8 @@ $(OBJ_DIR)/StandardErrorDataSink.o: $(SRC_DIR)/StandardErrorDataSink.cpp $(INC_D
 
 
 # testtp
-$(BIN_DIR)/testtp: $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/FileDataFactory.o $(OBJ_DIR)/StandardDataSink.o $(OBJ_DIR)/StandardDataSource.o $(OBJ_DIR)/StandardErrorDataSink.o $(OBJ_DIR)/DijkstraTransportationPlanner.o $(OBJ_DIR)/CSVOSMTransportationPlannerTest.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringDataSink.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/XMLWriter.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/DSVWriter.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/FileDataSink.o $(OBJ_DIR)/StringUtils.o $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/KMLWriter.o $(OBJ_DIR)/GeographicUtils.o
-	$(CXX) -o $(BIN_DIR)/testtp $(CXXFLAGS) $^ $(LDFLAGS)
+$(BIN_DIR)/testtp: $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/FileDataFactory.o $(OBJ_DIR)/StandardDataSink.o $(OBJ_DIR)/StandardDataSource.o $(OBJ_DIR)/StandardErrorDataSink.o $(OBJ_DIR)/DijkstraTransportationPlanner.o $(OBJ_DIR)/CDijkstraPathRouter.o $(OBJ_DIR)/CSVOSMTransportationPlannerTest.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringDataSink.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/XMLWriter.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/DSVWriter.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/FileDataSink.o $(OBJ_DIR)/StringUtils.o $(OBJ_DIR)/KMLWriter.o $(OBJ_DIR)/GeographicUtils.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
 	@echo "success 11..."
 	@echo ""
 
@@ -226,6 +228,8 @@ speedtest: $(OBJ_DIR)/SpeedTest.o $(OBJ_DIR)/StringUtils.o  $(OBJ_DIR)/DSVReader
 	@echo ""
 
 
+
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(OBJ_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -245,6 +249,10 @@ testtp: $(BIN_DIR)/testtp
 testtpcl: $(BIN_DIR)/testtpcl
 	@echo "Running testtpcl..."
 	@./$(BIN_DIR)/testtpcl
+
+testkml: $(BIN_DIR)/testkml
+	@echo "Running testkml..."
+	@./$(BIN_DIR)/testkml
 
 clean:
 	rm -rf $(OBJ_DIR)
