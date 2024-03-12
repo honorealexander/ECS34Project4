@@ -27,6 +27,9 @@ https://en.cppreference.com/w/cpp/types/numeric_limits/infinity
 for std::reverse
 https://en.cppreference.com/w/cpp/algorithm/reverse
 
+for help with sort in CSVBusSystemIndexer
+https://stackoverflow.com/questions/37557430/converting-const-auto-to-iterator
+
 ## Generative AI
 
 ### Prompt 1
@@ -325,3 +328,4 @@ std::size_t CBusSystemIndexer::StopCount() const noexcept {
 std::size_t CBusSystemIndexer::RouteCount() const noexcept {
     return (DImplementation->BusSystem) ? DImplementation->BusSystem->RouteCount() : 0;
 }
+
