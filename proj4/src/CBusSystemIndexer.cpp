@@ -17,11 +17,12 @@ CBusSystemIndexer::CBusSystemIndexer(std::shared_ptr<CBusSystem> bussystem)
 
 CBusSystemIndexer::~CBusSystemIndexer() = default;
 
-std::size_t CBusSystemIndexer::StopCount() const noexcept {
+
+std::size_t CBusSystemIndexer::StopCount() const noexcept { //checks for null pointer, chatgpt suggester ternary operator
     return (DImplementation->BusSystem) ? DImplementation->BusSystem->StopCount() : 0;
 }
 
-std::size_t CBusSystemIndexer::RouteCount() const noexcept {
+std::size_t CBusSystemIndexer::RouteCount() const noexcept { //checks for null pointer
     return (DImplementation->BusSystem) ? DImplementation->BusSystem->RouteCount() : 0;
 }
 
@@ -51,101 +52,100 @@ std::shared_ptr<CBusSystem::SStop> CBusSystemIndexer::SortedStopByIndex(std::siz
 }
 
 std::shared_ptr<CBusSystem::SRoute> CBusSystemIndexer::SortedRouteByIndex(std::size_t index) const noexcept {
-    auto routes = std::vector<std::shared_ptr<CBusSystem::SRoute>>();
+    auto routes = std::vector<std::shared_ptr<CBusSystem::SRoute>>(); //stores routes
     for (std::size_t i = 0; i < RouteCount(); ++i) {
         auto route = DImplementation->BusSystem->RouteByIndex(i);
-        if (route) {
+        if (route) { //if route valid add to vector
             routes.push_back(route);
         }
     }
 
-    if (!routes.empty() && index < routes.size()) {
-        std::sort(routes.begin(), routes.end(), [](const auto &lhs, const auto &rhs) {
-            if (lhs->Name() != rhs->Name()) {
+    if (!routes.empty() && index < routes.size()) { //make sure routes is sortable
+        std::sort(routes.begin(), routes.end(), [](const auto &lhs, const auto &rhs) { //stack overflow
+            if (lhs->Name() != rhs->Name()) { //compare based on route name than on stop count,
                 return lhs->Name() < rhs->Name();
             }
             return lhs->StopCount() < rhs->StopCount();
         });
 
-        return routes[index];
+        return routes[index]; //return route at index after sorting is complete
     }
 
     return nullptr;
 }
 
 std::shared_ptr<CBusSystem::SStop> CBusSystemIndexer::StopByNodeID(TNodeID id) const noexcept {
-    for (std::size_t i = 0; i < StopCount(); ++i) {
+    for (std::size_t i = 0; i < StopCount(); ++i) { //iterate through until we find our stop by id
         auto stop = DImplementation->BusSystem->StopByIndex(i);
         if (stop && stop->NodeID() == id) {
-            return stop;
+            return stop; 
         }
     }
-    return nullptr; // NodeID not found
+    return nullptr; //return null if not found
 }
 
 bool CBusSystemIndexer::RoutesByNodeIDs(TNodeID src, TNodeID dest, std::unordered_set<std::shared_ptr<CBusSystem::SRoute>> &routes) const noexcept {
     if (src == dest) {
-        return false; // Source and destination are the same, no valid routes
+        return false; //handle incorrect input, they cannot equal each other
     }
 
     for (std::size_t i = 0; i < RouteCount(); ++i) {
         auto route = DImplementation->BusSystem->RouteByIndex(i);
         if (!route) {
             std::cerr << "Route with index " << i << " not found." << std::endl;
-            continue;  // Skip to the next iteration if route is not found
+            continue;  //skip to next if route not found
         }
 
         const auto stopCount = route->StopCount();
         bool srcFound = false;
         bool destFound = false;
 
-        // Initialize the set for the stops in the current route
-        std::unordered_set<TNodeID> routeStops;
+        
+        std::unordered_set<TNodeID> routeStops; //create set for stops in route
 
         for (std::size_t j = 0; j < stopCount; ++j) {
             auto stopID = route->GetStopID(j);
             auto stop = DImplementation->BusSystem->StopByID(stopID);
             if (!stop) {
                 std::cerr << "Stop with ID " << stopID << " not found in route " << route->Name() << "." << std::endl;
-                continue;  // Skip to the next iteration if stop is not found
+                continue;  //skip if route not found
             }
 
             routeStops.insert(stop->NodeID());
 
-            if (stop->NodeID() == src) {
+            if (stop->NodeID() == src) { //checks to make sure src and dest aren't in current route
                 srcFound = true;
             } else if (stop->NodeID() == dest) {
                 destFound = true;
             }
         }
 
-        // Insert the route if both source and destination stops are found
+        //add route if path found
         if (srcFound && destFound) {
             routes.insert(route);
         }
     }
-
-    // Debugging information
+    //debug
     std::cout << "Source: " << src << ", Destination: " << dest << ", Routes size: " << routes.size() << std::endl;
 
-    // Return true if at least one valid route is found
+    //success if at least one route is found
     return !routes.empty();
 }
 
 bool CBusSystemIndexer::RouteBetweenNodeIDs(TNodeID src, TNodeID dest) const noexcept {
     if (src == dest) {
-        return false; // Source and destination are the same, no valid route
+        return false; //same as above
     }
 
-    for (std::size_t i = 0; i < RouteCount(); ++i) {
-        auto route = DImplementation->BusSystem->RouteByIndex(i);
+    for (std::size_t i = 0; i < RouteCount(); ++i) { //iterate through all routes
+        auto route = DImplementation->BusSystem->RouteByIndex(i); //get route at current index
         if (route) {
-            const auto stopCount = route->StopCount();
+            const auto stopCount = route->StopCount(); //get stop count for route
             bool srcFound = false;
             bool destFound = false;
 
-            for (std::size_t j = 0; j < stopCount; ++j) {
-                auto stopID = route->GetStopID(j);
+            for (std::size_t j = 0; j < stopCount; ++j) { //iterates through stops within current route
+                auto stopID = route->GetStopID(j); //looking for src and dest
                 auto stop = DImplementation->BusSystem->StopByID(stopID);
                 if (stop) {
                     if (stop->NodeID() == src) {
