@@ -30,6 +30,9 @@ https://en.cppreference.com/w/cpp/algorithm/reverse
 for help with sort in CSVBusSystemIndexer
 https://stackoverflow.com/questions/37557430/converting-const-auto-to-iterator
 
+for help with CTransportationPlannerCommandL
+https://cplusplus.com/reference/sstream/ostringstream/
+
 ## Generative AI
 
 ### Prompt 1
