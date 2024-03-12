@@ -1,7 +1,5 @@
 # CDjikstraTransportationPlanner
 
-# CDjikstraTransportationPlanner
-
 The CDijkstraTransportationPlanner has a private struct SImplementation with a unique ptr to it called DImplementation
 
 class CDijkstraTransportationPlanner : public CTransportationPlanner{
