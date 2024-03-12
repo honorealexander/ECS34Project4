@@ -257,9 +257,15 @@ bool CTransportationPlannerCommandLine::ProcessCommands() {
                                     "Invalid fastest parameter, see help.\n"
                                     "No valid path to save, see help.\n"
                                     "No valid path to print, see help.\n";
+
         std::vector<char> errorBuffer(errorMessage, errorMessage + sizeof(errorMessage) - 1);
         DImplementation->ErrorSink->Write(errorBuffer);
-    }
+
+        const char outputMessage[] = "> > > > > > > > > > ";
+        std::vector<char> outputBuffer(outputMessage, outputMessage + sizeof(outputMessage) - 1);
+        DImplementation->OutputSink->Write(outputBuffer);
+            }
+    
 
     return true;
 }
