@@ -277,3 +277,51 @@ for (const auto& vertex : DAdjacencyList) {
 
 ### Changes 5
 I used this for loop within my adjacency list to initialize my graph, then afterwards I am able to add the vertex and ID pair to my priority queue to use for DJikstra's.
+
+### Prompt 6
+User
+
+std::size_t CBusSystemIndexer::StopCount() const noexcept {
+    return DImplementation->BusSystem->StopCount();
+}
+
+I'm getting errors when I do this, why doesn't it work?
+
+### Response 6
+If you're encountering errors when calling DImplementation->BusSystem->StopCount(), it's likely because DImplementation->BusSystem is either not initialized or it's null when you're trying to access it.
+
+Here are a few things you can check:
+
+Initialization: Ensure that DImplementation->BusSystem is properly initialized before calling StopCount(). If DImplementation->BusSystem is a raw pointer, make sure it points to a valid object. If it's a smart pointer like std::shared_ptr or std::unique_ptr, make sure it's initialized with a valid object.
+
+Null Pointer Check: If DImplementation->BusSystem can be null, you should check for null before dereferencing it to avoid runtime errors. You can use an if statement to check if it's null before accessing StopCount().
+
+Here's an example of how you can add a null pointer check:
+
+cpp
+Copy code
+std::size_t CBusSystemIndexer::StopCount() const noexcept {
+    return (DImplementation->BusSystem) ? DImplementation->BusSystem->StopCount() : 0;
+}
+By adding this null pointer check, you can avoid dereferencing a null pointer, which should help resolve the errors you're encountering.
+
+### Changes 6
+I changed both my StopCount() and RouteCount() to adding a nullpointer check using ternary operator.
+
+I went from 
+std::size_t CBusSystemIndexer::StopCount() const noexcept {
+    return DImplementation->BusSystem->StopCount();
+}
+
+std::size_t CBusSystemIndexer::RouteCount() const noexcept {
+    return DImplementation->BusSystem->RouteCount();
+}
+
+To:
+std::size_t CBusSystemIndexer::StopCount() const noexcept {
+    return (DImplementation->BusSystem) ? DImplementation->BusSystem->StopCount() : 0;
+}
+
+std::size_t CBusSystemIndexer::RouteCount() const noexcept {
+    return (DImplementation->BusSystem) ? DImplementation->BusSystem->RouteCount() : 0;
+}
