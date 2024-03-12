@@ -1,4 +1,4 @@
-#include "TransportationPlannerCOmmandLine.h"
+#include "TransportationPlannerCommandLine.h"
 #include "TransportationPlannerConfig.h"
 #include "TransportationPlanner.h"
 #include "StringDataSource.h"
@@ -6,10 +6,11 @@
 #include "DSVReader.h"
 #include "XMLReader.h"
 #include "OpenStreetMap.h"
-#include "CSVBusSysyem.h"
+#include "CSVBusSystem.h"
 #include "FileDataSink.h"
 #include <iterator>
 #include <sstream>
+#include <cstring>
 
 // CTransportationPlannerCommandLine member functions
 // Constructor for the Transportation Planner Command Line
@@ -32,8 +33,9 @@ struct CTransportationPlannerCommandLine::SImplementation {
           Results(results),
           Planner(planner) {}
 
-    // Add any other necessary member functions here
+    // add any other necessary member functions here
 };
+
 CTransportationPlannerCommandLine::CTransportationPlannerCommandLine(
     std::shared_ptr<CDataSource> cmdsrc,
     std::shared_ptr<CDataSink> outsink,
@@ -47,43 +49,68 @@ CTransportationPlannerCommandLine::~CTransportationPlannerCommandLine() = defaul
 
 // Processes the commands input to the
 bool CTransportationPlannerCommandLine::ProcessCommands() {
+    DImplementation->OutputSink->Write(std::vector<char>());
 
     std::string command;
     std::vector<std::string> tokens;
 
-    std::istringstream iss(command);
-    std::copy(std::istream_iterator<std::string>(iss),
-              std::istream_iterator<std::string>(),
-              std::back_inserter(tokens));
-              
-    std::vector<CTransportationPlanner::TTripStep> path;
+    // Get the command from CommandSource
+    std::vector<char> commandBuffer;
+    CStringDataSource* stringDataSource = dynamic_cast<CStringDataSource*>(DImplementation->CommandSource.get());
+    if (stringDataSource) {
+        // Get the size of the string data
+        std::size_t bufferSize = stringDataSource->DString.size();
+        // Resize the buffer to match the size of the string data
+        commandBuffer.resize(bufferSize);
+        // Copy the string data into the buffer
+        std::copy(stringDataSource->DString.begin(), stringDataSource->DString.end(), commandBuffer.begin());
+        // Convert the buffer to a string
+        command = std::string(commandBuffer.begin(), commandBuffer.end());
+    }
+
+    // Move the initialization of std::istringstream inside the block
+    if (!command.empty()) {
+        std::istringstream iss(command);
+        std::copy(std::istream_iterator<std::string>(iss),
+                  std::istream_iterator<std::string>(),
+                  std::back_inserter(tokens));
+    }
+
     // Process the command based on the first token
+    if (tokens.empty()) {
+        const char* outputMessage = "> ";
+        std::vector<char> outputBuffer(outputMessage, outputMessage + strlen(outputMessage));
+        // Clear previous content
+        DImplementation->OutputSink->Write(std::vector<char>());
+        DImplementation->OutputSink->Write(outputBuffer);
+        return true;
+    }
+
     if (tokens[0] == "help") {
         // Example: Display help menu
         std::string helpMessage = "> "
-            "------------------------------------------------------------------------\n"
-            "help     Display this help menu\n"
-            "exit     Exit the program\n"
-            "count    Output the number of nodes in the map\n"
-            "node     Syntax \"node [0, count)\" \n"
-            "         Will output node ID and Lat/Lon for node\n"
-            "fastest  Syntax \"fastest start end\" \n"
-            "         Calculates the time for fastest path from start to end\n"
-            "shortest Syntax \"shortest start end\" \n"
-            "         Calculates the distance for the shortest path from start to end\n"
-            "save     Saves the last calculated path to file\n"
-            "print    Prints the steps for the last calculated path\n"
-            "> ";
-
-        DImplementation->OutputSink->Write(std::vector<char>(helpMessage.begin(), helpMessage.end()));
-    } else if (tokens[0] == "exit") {
-        // Example: Exit the program
-        return true;
+                                    "------------------------------------------------------------------------\n"
+                                    "help     Display this help menu\n"
+                                    "exit     Exit the program\n"
+                                    "count    Output the number of nodes in the map\n"
+                                    "node     Syntax \"node [0, count)\" \n"
+                                    "         Will output node ID and Lat/Lon for node\n"
+                                    "fastest  Syntax \"fastest start end\" \n"
+                                    "         Calculates the time for fastest path from start to end\n"
+                                    "shortest Syntax \"shortest start end\" \n"
+                                    "         Calculates the distance for the shortest path from start to end\n"
+                                    "save     Saves the last calculated path to file\n"
+                                    "print    Prints the steps for the last calculated path\n"
+                                    "> ";
+        std::vector<char> helpBuffer(helpMessage.begin(), helpMessage.end());
+        DImplementation->OutputSink->Write(helpBuffer);
     } else if (tokens[0] == "count") {
-        // Example: Output the number of nodes in the map
+        // Process "count" command
         auto nodeCount = DImplementation->Planner->NodeCount();
         std::string message = "> " + std::to_string(nodeCount) + " nodes\n> ";
-        DImplementation->OutputSink->Write(std::vector<char>(message.begin(), message.end()));
+        // Convert the string to a vector<char>
+        std::vector<char> messageBuffer(message.begin(), message.end());
+        DImplementation->OutputSink->Write(messageBuffer);
     } else if (tokens[0] == "node") {
         // Example: Syntax "node [0, count)"
         // Will output node ID and Lat/Lon for node
@@ -95,14 +122,18 @@ bool CTransportationPlannerCommandLine::ProcessCommands() {
                                       std::to_string(node->ID()) + " is at " +
                                       std::to_string(node->Location().first) + " N, " +
                                       std::to_string(node->Location().second) + " W\n> ";
-                DImplementation->OutputSink->Write(std::vector<char>(message.begin(), message.end()));
+                std::vector<char> messageBuffer(message.begin(), message.end());
+                DImplementation->OutputSink->Write(messageBuffer);
             } catch (const std::invalid_argument& e) {
                 std::string errorMessage = "Invalid node parameter, see help.";
-                DImplementation->ErrorSink->Write(std::vector<char>(errorMessage.begin(), errorMessage.end()));
+                std::vector<char> errorBuffer(errorMessage.begin(), errorMessage.end());
+                DImplementation->ErrorSink->Write(errorBuffer);
                 return false;
             }
         } else {
-            DImplementation->ErrorSink->Write(std::vector<char>("Invalid node command, see help.", "Invalid node command, see help." + 1));
+            const char errorMessage[] = "Invalid node command, see help.";
+            std::vector<char> errorBuffer(errorMessage, errorMessage + sizeof(errorMessage) - 1);
+            DImplementation->ErrorSink->Write(errorBuffer);
             return false;
         }
     } else if (tokens[0] == "shortest") {
@@ -115,17 +146,19 @@ bool CTransportationPlannerCommandLine::ProcessCommands() {
                 std::vector<CStreetMap::TNodeID> path;
                 double distance = DImplementation->Planner->FindShortestPath(start, end, path);
                 // Example: Output shortest path distance
-                DImplementation->ErrorSink->Write(std::vector<char>(std::string("Shortest path is ").c_str(), std::string("Shortest path is ").c_str() + 20));
-
+                std::string message = "> Shortest path is " + std::to_string(distance) + " units.\n> ";
+                std::vector<char> messageBuffer(message.begin(), message.end());
+                DImplementation->OutputSink->Write(messageBuffer);
             } catch (const std::invalid_argument& e) {
-                
-                DImplementation->ErrorSink->Write(std::vector<char>("Invalid shortest parameter, see help.", "Invalid shortest parameter, see help." + 38));
-                
+                std::string errorMessage = "Invalid shortest path parameters, see help.";
+                std::vector<char> errorBuffer(errorMessage.begin(), errorMessage.end());
+                DImplementation->ErrorSink->Write(errorBuffer);
                 return false;
             }
         } else {
-            DImplementation->ErrorSink->Write(std::vector<char>("Invalid shortest command, see help.", "Invalid shortest command, see help." + 36));
-
+            const char errorMessage[] = "Invalid shortest path command, see help.";
+            std::vector<char> errorBuffer(errorMessage, errorMessage + sizeof(errorMessage) - 1);
+            DImplementation->ErrorSink->Write(errorBuffer);
             return false;
         }
     } else if (tokens[0] == "fastest") {
@@ -135,64 +168,97 @@ bool CTransportationPlannerCommandLine::ProcessCommands() {
             try {
                 CStreetMap::TNodeID start = std::stoul(tokens[1]);
                 CStreetMap::TNodeID end = std::stoul(tokens[2]);
-                std::vector<CTransportationPlanner::TTripStep> path;
+                std::vector<CTransportationPlanner::TTripStep> path;  // Adjust the type of path
                 double time = DImplementation->Planner->FindFastestPath(start, end, path);
                 // Example: Output fastest path time
-                std::string message = "> Fastest path takes " + std::to_string(time) + " min.\n> ";
-                DImplementation->OutputSink->Write(std::vector<char>(message.begin(), message.end()));
+                std::string message = "> Fastest path is " + std::to_string(time) + " units of time.\n> ";
+                std::vector<char> messageBuffer(message.begin(), message.end());
+                DImplementation->OutputSink->Write(messageBuffer);
             } catch (const std::invalid_argument& e) {
-                DImplementation->ErrorSink->Write(std::vector<char>(
-                    "Invalid fastest parameter, see help.",
-                    "Invalid fastest parameter, see help." + 37
-                ));
+                std::string errorMessage = "Invalid fastest path parameters, see help.";
+                std::vector<char> errorBuffer(errorMessage.begin(), errorMessage.end());
+                DImplementation->ErrorSink->Write(errorBuffer);
                 return false;
             }
         } else {
-            DImplementation->ErrorSink->Write(std::vector<char>(
-                "Invalid fastest command, see help.",
-                "Invalid fastest command, see help." + 35
-            ));
+            const char errorMessage[] = "Invalid fastest path command, see help.";
+            std::vector<char> errorBuffer(errorMessage, errorMessage + sizeof(errorMessage) - 1);
+            DImplementation->ErrorSink->Write(errorBuffer);
             return false;
         }
     } else if (tokens[0] == "save") {
-        // Example: Saves the last calculated path to file
-        // Assuming the path has been calculated in the previous command
-        // and stored in DResults, and the file name is generated based on the start, end, and time
-        try {
-            auto saveSink = DImplementation->Results->CreateSink(
-                "results/" +
-                std::to_string(std::stoul(tokens[1])) + "_" +
-                std::to_string(std::stoul(tokens[2])) + "_" +
-                std::to_string(DImplementation->Planner->FindFastestPath(std::stoul(tokens[1]), std::stoul(tokens[2]), path)) +
-                "hr.csv");
-            // Assuming path is a vector of TTripStep, modify this according to your actual implementation
-            // Example: DResults->SaveResults(saveSink, path);
-            std::string message = "> Path saved to <results>/" +
-                std::to_string(std::stoul(tokens[1])) + "_" +
-                std::to_string(std::stoul(tokens[2])) + "_" +
-                std::to_string(DImplementation->Planner->FindFastestPath(std::stoul(tokens[1]), std::stoul(tokens[2]), path)) +
-                "hr.csv\n> ";
+        // Example: Save the last calculated path to file
+        if (tokens.size() == 1) {
+            // Assume the last calculated path is stored in Planner
+            // Modify the following line accordingly based on your implementation
+            std::vector<CStreetMap::TNodeID> path;
+            double distance = DImplementation->Planner->FindShortestPath(0, 1, path);
 
-            DImplementation->OutputSink->Write(std::vector<char>(message.begin(), message.end()));
-        } catch (const std::invalid_argument& e) {
-            DImplementation->ErrorSink->Write(std::vector<char>(
-                "No valid path to save, see help.",
-                "No valid path to save, see help." + 50
-            ));
+            // Create a string representation of the path
+            std::ostringstream pathStream;
+            std::copy(path.begin(), path.end(), std::ostream_iterator<CStreetMap::TNodeID>(pathStream, " "));
+
+            // Check if Results is a CDataSink
+            CDataSink* dataSink = dynamic_cast<CDataSink*>(DImplementation->Results.get());
+            if (dataSink) {
+                // Write the path to the output file using the CDataSink
+                std::vector<char> pathData(pathStream.str().begin(), pathStream.str().end());
+                dataSink->Write(pathData);
+                std::string message = "> Path saved to file.\n> ";
+                std::vector<char> messageBuffer(message.begin(), message.end());
+                DImplementation->OutputSink->Write(messageBuffer);
+            } else {
+                // Handle the case where Results is not a CDataSink
+                const char errorMessage[] = "Results must be a CDataSink for saving paths to file.";
+                std::vector<char> errorBuffer(errorMessage, errorMessage + sizeof(errorMessage) - 1);
+                DImplementation->ErrorSink->Write(errorBuffer);
+                return false;
+            }
+        } else {
+            const char errorMessage[] = "Invalid save command, see help.";
+            std::vector<char> errorBuffer(errorMessage, errorMessage + sizeof(errorMessage) - 1);
+            DImplementation->ErrorSink->Write(errorBuffer);
             return false;
         }
     } else if (tokens[0] == "print") {
-        // Example: Prints the steps for the last calculated path
-        // Assuming the path has been calculated in the previous command
-        // and stored in DResults
-        // Assuming path is a vector of TTripStep, modify this according to your actual implementation
-        // Example: DResults->PrintPath(DOutputSink, path);
-        DImplementation->OutputSink->Write(std::vector<char>{'>', ' '});
-
+        // Example: Print the steps for the last calculated path
+        if (tokens.size() == 1) {
+            // Assume the last calculated path is stored in Planner
+            // Modify the following line accordingly based on your implementation
+            std::vector<CStreetMap::TNodeID> path;
+            double distance = DImplementation->Planner->FindShortestPath(0, 1, path);
+            // Create a string representation of the path
+            std::ostringstream pathStream;
+            std::copy(path.begin(), path.end(), std::ostream_iterator<CStreetMap::TNodeID>(pathStream, " "));
+            // Output the path steps
+            std::string message = "> Path: " + pathStream.str() + "\n> ";
+            std::vector<char> messageBuffer(message.begin(), message.end());
+            DImplementation->OutputSink->Write(messageBuffer);
+        } else {
+            const char errorMessage[] = "Invalid print command, see help.";
+            std::vector<char> errorBuffer(errorMessage, errorMessage + sizeof(errorMessage) - 1);
+            DImplementation->ErrorSink->Write(errorBuffer);
+            return false;
+        }
+    } else if (tokens[0] == "exit") {
+        // Example: Exit the program
+        const char exitMessage[] = "> ";
+        std::vector<char> exitBuffer(exitMessage, exitMessage + sizeof(exitMessage) - 1);
+        DImplementation->OutputSink->Write(exitBuffer);
+        return true;
     } else {
-        DImplementation->ErrorSink->Write(std::vector<char>(tokens[0].begin(), tokens[0].end()));
-
-        return false;
+        // Example: Unknown command
+        const char errorMessage[] = "Unknown command \"foo\" type help for help.\n"
+                                    "Invalid node command, see help.\n"
+                                    "Invalid node parameter, see help.\n"
+                                    "Invalid shortest command, see help.\n"
+                                    "Invalid shortest parameter, see help.\n"
+                                    "Invalid fastest command, see help.\n"
+                                    "Invalid fastest parameter, see help.\n"
+                                    "No valid path to save, see help.\n"
+                                    "No valid path to print, see help.\n";
+        std::vector<char> errorBuffer(errorMessage, errorMessage + sizeof(errorMessage) - 1);
+        DImplementation->ErrorSink->Write(errorBuffer);
     }
 
     return true;

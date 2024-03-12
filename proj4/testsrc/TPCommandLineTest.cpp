@@ -5,10 +5,6 @@
 #include "StringDataSource.h"
 
 
-TEST(OSMTest, True){
-    EXPECT_TRUE(true);
-}
-
 class CMockTransportationPlanner : public CTransportationPlanner{
     public:
         MOCK_METHOD(std::size_t, NodeCount, (), (const, noexcept, override));
@@ -274,6 +270,7 @@ TEST(TransporationPlannerCommandLine, ErrorTest){
     CTransportationPlannerCommandLine CommandLine(InputSource,OutputSink,ErrorSink,MockFactory,MockPlanner);
 
     EXPECT_TRUE(CommandLine.ProcessCommands());
+    
     EXPECT_EQ(OutputSink->String(), "> "
                                     "> "
                                     "> "
@@ -284,6 +281,7 @@ TEST(TransporationPlannerCommandLine, ErrorTest){
                                     "> "
                                     "> "
                                     "> ");
+    
     EXPECT_EQ(ErrorSink->String(),  "Unknown command \"foo\" type help for help.\n"
                                     "Invalid node command, see help.\n"
                                     "Invalid node parameter, see help.\n"

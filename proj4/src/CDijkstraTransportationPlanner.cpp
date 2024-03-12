@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <queue>
 #include "kmlout.cpp"
+#include "StreetMap.h"
 #include "OpenStreetMap.cpp"
 
 using TNodeID = CStreetMap::TNodeID;
@@ -60,7 +61,6 @@ CDijkstraTransportationPlanner::~CDijkstraTransportationPlanner() {
 std::size_t CDijkstraTransportationPlanner::NodeCount() const noexcept {
     // Implement your logic to return the number of nodes in the street map
     //return COpenStreetMap::nodes.size();  // Assuming DNodes is a vector containing your street map nodes
-    return 0;
 }
 
 std::shared_ptr<CStreetMap::SNode> CDijkstraTransportationPlanner::SortedNodeByIndex(std::size_t index) const noexcept {

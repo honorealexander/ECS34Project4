@@ -168,9 +168,9 @@ $(BIN_DIR)/testtpcl: $(OBJ_DIR)/TransportationPlannerCommandLine.o $(OBJ_DIR)/TP
 	@echo "success 10..."
 	@echo ""
 
-$(OBJ_DIR)/TransportationPlannerCommandLine.o: $(SRC_DIR)/TransportationPlannerCommandLine.cpp $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h $(INC_DIR)/TransportationPlannerConfig.h 
+$(OBJ_DIR)/TransportationPlannerCommandLine.o: $(SRC_DIR)/CTransportationPlannerCommandL.cpp $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h $(INC_DIR)/TransportationPlannerConfig.h 
 	@mkdir -p $(OBJ_DIR)
-	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/TransportationPlannerCommandLine.cpp
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/CTransportationPlannerCommandL.cpp
 
 $(OBJ_DIR)/TPCommandLineTest.o: $(TEST_SRC_DIR)/TPCommandLineTest.cpp $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/TransportationPlannerCommandLine.h $(INC_DIR)/TransportationPlannerConfig.h 
 	$(CXX) -o $@ -c $(CXXFLAGS) $(TEST_SRC_DIR)/TPCommandLineTest.cpp
@@ -186,10 +186,13 @@ $(OBJ_DIR)/StandardErrorDataSink.o: $(SRC_DIR)/StandardErrorDataSink.cpp $(INC_D
 
 
 # testtp
-$(BIN_DIR)/testtp: $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/FileDataFactory.o $(OBJ_DIR)/StandardDataSink.o $(OBJ_DIR)/StandardDataSource.o $(OBJ_DIR)/StandardErrorDataSink.o $(OBJ_DIR)/DijkstraTransportationPlanner.o $(OBJ_DIR)/CSVOSMTransportationPlannerTest.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringDataSink.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/XMLWriter.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/DSVWriter.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/FileDataSink.o $(OBJ_DIR)/StringUtils.o $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/KMLWriter.o 
-	$(CXX) -o $@ $^ $(LDFLAGS)
+$(BIN_DIR)/testtp: $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/FileDataFactory.o $(OBJ_DIR)/StandardDataSink.o $(OBJ_DIR)/StandardDataSource.o $(OBJ_DIR)/StandardErrorDataSink.o $(OBJ_DIR)/DijkstraTransportationPlanner.o $(OBJ_DIR)/CSVOSMTransportationPlannerTest.o $(OBJ_DIR)/StringDataSource.o $(OBJ_DIR)/StringDataSink.o $(OBJ_DIR)/XMLReader.o $(OBJ_DIR)/XMLWriter.o $(OBJ_DIR)/DSVReader.o $(OBJ_DIR)/DSVWriter.o $(OBJ_DIR)/CSVBusSystem.o $(OBJ_DIR)/FileDataSink.o $(OBJ_DIR)/StringUtils.o $(OBJ_DIR)/FileDataSource.o $(OBJ_DIR)/KMLWriter.o $(OBJ_DIR)/GeographicUtils.o
+	$(CXX) -o $(BIN_DIR)/testtp $(CXXFLAGS) $^ $(LDFLAGS)
 	@echo "success 11..."
 	@echo ""
+
+$(OBJ_DIR)/GeographicUtils.o: $(SRC_DIR)/GeographicUtils.cpp $(INC_DIR)/GeographicUtils.h
+	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/GeographicUtils.cpp
 
 $(OBJ_DIR)/DijkstraTransportationPlanner.o: $(SRC_DIR)/CDijkstraTransportationPlanner.cpp $(INC_DIR)/DijkstraTransportationPlanner.h $(INC_DIR)/TransportationPlanner.h $(INC_DIR)/GeographicUtils.h $(INC_DIR)/StandardDataSink.h $(INC_DIR)/StandardDataSource.h $(INC_DIR)/StandardErrorDataSink.h
 	$(CXX) -o $@ -c $(CXXFLAGS) $(SRC_DIR)/CDijkstraTransportationPlanner.cpp

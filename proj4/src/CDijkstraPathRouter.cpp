@@ -98,7 +98,7 @@ bool CDijkstraPathRouter::Precompute(std::chrono::steady_clock::time_point deadl
     std::vector<std::vector<double>> distanceMatrix(vertexCount, std::vector<double>(vertexCount, std::numeric_limits<double>::infinity()));
 
     // Initialize the next vertex matrix with invalid vertices
-std::vector<std::vector<TVertexID>> predecessorMatrix(vertexCount, std::vector<TVertexID>(vertexCount, std::numeric_limits<TVertexID>::max()));
+    std::vector<std::vector<TVertexID>> predecessorMatrix(vertexCount, std::vector<TVertexID>(vertexCount, std::numeric_limits<TVertexID>::max()));
 
     // Set the initial distances and next vertices based on the adjacency list
     for (const auto& vertexPair : adjacencyList) {
