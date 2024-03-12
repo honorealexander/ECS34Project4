@@ -24,6 +24,8 @@ https://en.cppreference.com/w/cpp/utility/move
 for help with Dijkstras
 https://en.cppreference.com/w/cpp/types/numeric_limits/infinity
 
+for std::reverse
+https://en.cppreference.com/w/cpp/algorithm/reverse
 
 ## Generative AI
 
